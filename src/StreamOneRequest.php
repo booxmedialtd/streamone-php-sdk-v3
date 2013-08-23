@@ -44,6 +44,16 @@ class StreamOneRequest
 	private $action;
 	
 	/**
+	 * When the request must be signed with an active session, the session token to use
+	 */
+	private $session_token = null;
+	
+	/**
+	 * When the request must be signed with an active session, the session key to use
+	 */
+	private $session_key = null;
+	
+	/**
 	 * The parameters to use for the API request
 	 * 
 	 * The parameters are the GET-parameters sent, and include meta-data for the request such
@@ -87,8 +97,12 @@ class StreamOneRequest
 	 *   The API command to call
 	 * @param string $action
 	 *   The action to perform on the API command
+	 * @param string $session_token
+	 *   When the request must be signed with an active session, the session token to use
+	 * @param string $session_key
+	 *   When the request must be signed with an active session, the session key to use
 	 */
-	public function __construct($command, $action)
+	public function __construct($command, $action, $session_token = null, $session_key = null)
 	{
 		$this->command = $command;
 		$this->action = $action;
@@ -100,10 +114,22 @@ class StreamOneRequest
 			'authentication_type' => 'user'
 		);
 		
-		// Check if a default account is specified
-		if (isset(StreamOneConfig::$default_account))
+		// Check whether to use application authentication
+		if (StreamOneConfig::$use_application_auth)
 		{
-			$this->parameters['account'] = StreamOneConfig::$default_account;
+			$this->parameters['authentication_type'] = 'application';
+			
+			// Store session token/key
+			$this->session_token = $session_token;
+			$this->session_key = $session_key;
+		}
+		else // user authentication
+		{
+			// Check if a default account is specified
+			if (isset(StreamOneConfig::$default_account))
+			{
+				$this->parameters['account'] = StreamOneConfig::$default_account;
+			}
 		}
 		
 		// Initially, there are no arguments
@@ -360,14 +386,30 @@ class StreamOneRequest
 		$ts = time();
 		
 		// Add basic authentication parameters
-		$parameters['user'] = StreamOneConfig::$user;
 		$parameters['timestamp'] = $ts;
+		if (StreamOneConfig::$use_application_auth)
+		{
+			$parameters['application'] = StreamOneConfig::$application;
+			$key = StreamOneConfig::$application_key;
+			
+			// Possibly add session key
+			if (isset($this->session_token) && isset($this->session_key))
+			{
+				$parameters['session'] = $this->session_token;
+				$key .= $this->session_key;
+			}
+		}
+		else
+		{
+			$parameters['user'] = StreamOneConfig::$user;
+			$key = StreamOneConfig::$user_key;
+		}
 		
 		// Calculate signature
 		$url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments);
-		$parameters['signature'] = md5(StreamOneConfig::$api_key . $url);
+		$parameters['signature'] = md5($key . $url);
 		
-		var_dump(StreamOneConfig::$api_key . $url);
+		var_dump($key . $url);
 		
 		return $parameters;
 	}
