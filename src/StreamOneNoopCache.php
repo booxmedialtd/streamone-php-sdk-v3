@@ -1,8 +1,7 @@
 <?php
 /**
- * StreamOne no-op caching class
- *
  * @addtogroup StreamOneSDK
+ * @{
  */
 
 require_once("StreamOneCacheInterface.php");
@@ -38,4 +37,7 @@ class StreamOneNoopCache implements StreamOneCacheInterface
         ; // Unfortunately, PHP has no skip or noop statement
     }
 }
-?>
+
+/**
+ * @}
+ */

@@ -1,8 +1,7 @@
 <?php
 /**
- * Interface for StreamOne caching classes
- * 
  * @addtogroup StreamOneSDK
+ * @{
  */
 
 /**
@@ -30,4 +29,7 @@ interface StreamOneCacheInterface
      */
     public function set($key, $value);
 }
-?>
+
+/**
+ * @}
+ */

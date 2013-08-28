@@ -1,6 +1,16 @@
 <?php
 /**
- * @addtogroup StreamOneSDK
+ * @addtogroup StreamOneSDK The StreamOne SDK
+ * 
+ * The StreamOne SDK contains various classes for communication with the StreamOne platform. All
+ * classes work with configuration parameters defined in StreamOneConfig.php. To start working
+ * with the SDK, copy StreamOneconfig.dist.php to StreamOneConfig.php and adjust the settings
+ * where needed.
+ * 
+ * The central class in the SDK is the StreamOneRequest class, which is used to perform requests
+ * to the external API.
+ * 
+ * @{
  */
 
 // Include configuration file, if no configuration has been defined yet
@@ -569,3 +579,7 @@ class StreamOneRequest
 		}
 	}
 }
+
+/**
+ * @}
+ */

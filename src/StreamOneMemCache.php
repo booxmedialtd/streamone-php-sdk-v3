@@ -1,8 +1,7 @@
 <?php
 /**
- * StreamOne file caching class
- *
  * @addtogroup StreamOneSDK
+ * @{
  */
 
 require_once("StreamOneCacheInterface.php");
@@ -62,4 +61,7 @@ class StreamOneMemCache implements StreamOneCacheInterface
         $this->memcache->set($key, $value, 0, $this->expirationTime);
     }
 }
-?>
+
+/**
+ * @}
+ */

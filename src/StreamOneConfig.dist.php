@@ -1,8 +1,8 @@
 <?php
 /**
  * @addtogroup StreamOneSDK
+ * @{
  */
-
 
 /**
  * This class contains the configuration options for the StreamOne related
@@ -135,4 +135,6 @@ StreamOneConfig::$cache = new StreamOneFileCache("/tmp/s1_cache", 300);
 // require_once("StreamOneMemCache.php");
 // StreamOneConfig::$cache = new StreamOneMemCache("localhost", 12111, 300);
 
-?>
+/**
+ * @}
+ */

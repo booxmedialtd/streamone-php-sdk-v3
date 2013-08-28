@@ -1,8 +1,7 @@
 <?php
 /**
- * StreamOne file caching class
- *
  * @addtogroup StreamOneSDK
+ * @{
  */
  
 require_once("StreamOneCacheInterface.php");
@@ -100,4 +99,7 @@ class StreamOneFileCache implements StreamOneCacheInterface
         return $this->basedir . sha1($key);
     }
 }
-?>
+
+/**
+ * @}
+ */
