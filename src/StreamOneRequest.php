@@ -1,6 +1,6 @@
 <?php
 /**
- * @package StreamOne
+ * @addtogroup StreamOneSDK
  */
 
 // Include configuration file, if no configuration has been defined yet
@@ -25,7 +25,7 @@ if (!class_exists('StreamOneConfig'))
  *         ->execute();
  * if ($request->success())
  * {
- *     echo "Success!";
+ *     var_dump($request->body());
  * }
  * \endcode
  * 
@@ -91,18 +91,19 @@ class StreamOneRequest
 	private $protocol = "http";
 	
 	/**
+	 * Whether the response was retrieved from the cache
+	 */
+	private $from_cache = false;
+	
+	/**
 	 * Construct a new request
 	 * 
 	 * @param string $command
 	 *   The API command to call
 	 * @param string $action
 	 *   The action to perform on the API command
-	 * @param string $session_token
-	 *   When the request must be signed with an active session, the session token to use
-	 * @param string $session_key
-	 *   When the request must be signed with an active session, the session key to use
 	 */
-	public function __construct($command, $action, $session_token = null, $session_key = null)
+	public function __construct($command, $action)
 	{
 		$this->command = $command;
 		$this->action = $action;
@@ -118,10 +119,6 @@ class StreamOneRequest
 		if (StreamOneConfig::$use_application_auth)
 		{
 			$this->parameters['authentication_type'] = 'application';
-			
-			// Store session token/key
-			$this->session_token = $session_token;
-			$this->session_key = $session_key;
 		}
 		else // user authentication
 		{
@@ -134,6 +131,29 @@ class StreamOneRequest
 		
 		// Initially, there are no arguments
 		$this->arguments = array();
+	}
+	
+	/**
+	 * Set the session information to use for this request
+	 * 
+	 * By providing the session information, sessions are enabled for this request. To disable
+	 * sessions, call this method with null for both values.
+	 * 
+	 * Using sessions is only supported when application authentication is used. If this is not
+	 * enabled, this method will do nothing.
+	 * 
+	 * @param string $token
+	 *   The session token to use for this request
+	 * @param string $key
+	 *   The key to use with the specified session token
+	 */
+	public function setSession($token, $key)
+	{
+		if (StreamOneConfig::$use_application_auth)
+		{
+			$this->session_token = $token;
+			$this->session_key = $key;
+		}
 	}
 	
 	/**
@@ -220,17 +240,25 @@ class StreamOneRequest
 	 */
 	public function execute()
 	{
-		// Gather path, signed parameters and arguments
-		$server = $this->protocol() . StreamOneConfig::$api_url;
-		$path = $this->path();
-		$parameters = $this->signedParameters();
-		$arguments = $this->arguments();
-		
-		// Actually execute the request
-		$response = $this->sendRequest($server, $path, $parameters, $arguments);
+		// Check cache
+		$response = $this->retrieveCache();
+		if ($response === false)
+		{
+			// Gather path, signed parameters and arguments
+			$server = $this->protocol() . StreamOneConfig::$api_url;
+			$path = $this->path();
+			$parameters = $this->signedParameters();
+			$arguments = $this->arguments();
+			
+			// Actually execute the request
+			$response = $this->sendRequest($server, $path, $parameters, $arguments);
+		}
 		
 		// Handle the response
 		$this->handleResponse($response);
+		
+		// Store in cache if possible
+		$this->saveCache();
 		
 		return $this;
 	}
@@ -465,6 +493,79 @@ class StreamOneRequest
 			
 			// Attempt to decode the (JSON) response; returns null if failed
 			$this->response = json_decode($response, true);
+			
+			// Check the resulting header to see if we have a general error; report them
+			$header = $this->header();
+			if (in_array($header['status'], StreamOneConfig::$visible_errors))
+			{
+				echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $header['status'] . ': <em>' . htmlspecialchars($header['statusmessage']) . '</em></div>';
+			}
+		}
+	}
+	
+	/**
+	 * Check whether the response is cacheable
+	 * 
+	 * @retval bool
+	 *   True if and only if a successful response was given, which is cacheable
+	 */
+	protected function cacheable()
+	{
+		if ($this->success())
+		{
+			$header = $this->header();
+			if (array_key_exists('cacheable', $header) && $header['cacheable'])
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Determine the key to use for caching
+	 * 
+	 * @retval string
+	 *   A cache-key representing this request
+	 */
+	protected function cacheKey()
+	{
+		return $this->path() . '?' . http_build_query($this->parameters()) . '#' .
+			http_build_query($this->arguments());
+	}
+	
+	/**
+	 * Attempt to retrieve the result for the current request from the cache
+	 * 
+	 * @retval string
+	 *   The cached plain text response if it was found in the cache; false otherwise
+	 */
+	protected function retrieveCache()
+	{
+		$response = StreamOneConfig::$cache->get($this->cacheKey());
+		
+		if ($response !== false)
+		{
+			$this->from_cache = true;
+			return $response;
+		}
+		
+		// No cache hit
+		return false;
+	}
+	
+	/**
+	 * Save the result of the current request to the cache
+	 * 
+	 * This method only saves to cache if the request is cacheable, and if the request was not
+	 * retrieved from the cache.
+	 */
+	protected function saveCache()
+	{
+		if ($this->cacheable() && !$this->from_cache)
+		{
+			StreamOneConfig::$cache->set($this->cacheKey(), $this->plainResponse());
 		}
 	}
 }
