@@ -445,7 +445,7 @@ class StreamOneRequest
 		
 		// Calculate signature
 		$url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments);
-		$parameters['signature'] = md5($key . $url);
+		$parameters['signature'] = hash_hmac('sha1', $url, $key);
 		
 		var_dump($key . $url);
 		
