@@ -468,6 +468,12 @@ abstract class StreamOneRequestBase
 		}
 	}
 
+	/**
+	 * This function returns extra parameters used for stream_context_create in sending requests
+	 *
+	 * @retval array
+	 *   Extra parameters to pass to stream_context_create for sending requests
+	 */
 	protected function extraStreamParameters()
 	{
 		return array();

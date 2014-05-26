@@ -60,14 +60,9 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * Whether the response was retrieved from the cache
 	 */
 	private $from_cache = false;
-	
+
 	/**
-	 * Construct a new request
-	 * 
-	 * @param string $command
-	 *   The API command to call
-	 * @param string $action
-	 *   The action to perform on the API command
+	 * @see StreamOneRequestBase::__construct
 	 */
 	public function __construct($command, $action)
 	{
@@ -127,6 +122,8 @@ class StreamOneRequest extends StreamOneRequestBase
 	 *
 	 * It will first check if the data is still available in the cache
 	 *
+	 * @see StreamOneRequestBase::execute
+	 *
 	 * @retval StreamOneRequest
 	 *   A reference to this object, to allow chaining
 	 */
@@ -147,10 +144,7 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
-	 * Retrieves the base URL from StreamOneConfig
-	 *
-	 * @retval string
-	 *   The base URL of the API as defined in StreamOneConfig
+	 * @see StreamOneRequestBase::apiUrl
 	 */
 	protected function apiUrl()
 	{
@@ -158,10 +152,7 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
-	 * This function retrieves the key used for signing the request
-	 *
-	 * @retval string
-	 *   The key used for signing
+	 * @see StreamOneRequestBase::signingKey
 	 */
 	protected function signingKey()
 	{
@@ -184,10 +175,7 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
-	 * Retrieve the parameters used for signing
-	 *
-	 * @retval array
-	 *   An array containing the parameters needed for signing
+	 * @see StreamOneRequestBase::parametersForSigning
 	 */
 	protected function parametersForSigning()
 	{
@@ -215,6 +203,8 @@ class StreamOneRequest extends StreamOneRequestBase
 	 *
 	 * If the header contains an error status code set in StreamOneConfig::$visible_errors, a clear error will be
 	 * shown on the screen
+	 *
+	 * @see StreamOneRequestBase::handleResponse
 	 * 
 	 * @param mixed $response
 	 *   The plain-text response as received from the API; parsing will not be succesful if this is
