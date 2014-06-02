@@ -107,7 +107,7 @@ abstract class StreamOneRequestBase
 	 */
 	public function setArgument($argument, $value)
 	{
-		if ($value == null)
+		if ($value === null)
 		{
 			$value = '';
 		}
