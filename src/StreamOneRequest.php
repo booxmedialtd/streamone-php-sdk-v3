@@ -76,11 +76,6 @@ class StreamOneRequest extends StreamOneRequestBase
 		else // user authentication
 		{
 			$this->parameters['authentication_type'] = 'user';
-			// Check if a default account is specified
-			if (isset(StreamOneConfig::$default_account))
-			{
-				$this->parameters['account'] = StreamOneConfig::$default_account;
-			}
 		}
 	}
 	
@@ -193,6 +188,13 @@ class StreamOneRequest extends StreamOneRequestBase
 		else
 		{
 			$parameters['user'] = StreamOneConfig::$user;
+
+			// Check if a default account is specified
+			if (!isset($parameters['account']) && !isset($parameters['customer']) &&
+			    isset(StreamOneConfig::$default_account))
+			{
+				$parameters['account'] = StreamOneConfig::$default_account;
+			}
 		}
 
 		return $parameters;

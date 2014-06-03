@@ -96,6 +96,24 @@ abstract class StreamOneRequestBase
 	}
 
 	/**
+	 * Set the customer to use for this request
+	 *
+	 * Some actions require an account to be set and others have it as an alternative to an account.
+	 * Refer to the documentation to check whether it is needed
+	 *
+	 * @param string $customer
+	 *   Hash of the customer to use for the request
+	 * @retval StreamOneRequest
+	 *   A reference to this object, to allow chaining
+	 */
+	public function setCustomer($customer)
+	{
+		$this->parameters['customer'] = $customer;
+
+		return $this;
+	}
+
+	/**
 	 * Set the value of a single argument
 	 *
 	 * @param string $argument
