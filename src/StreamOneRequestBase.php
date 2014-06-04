@@ -429,8 +429,6 @@ abstract class StreamOneRequestBase
 		$url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments);
 		$key = $this->signingKey();
 
-		var_dump($key . $url);
-
 		return hash_hmac('sha1', $url, $key);
 	}
 
