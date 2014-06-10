@@ -52,9 +52,9 @@ class StreamOneRequest extends StreamOneRequestBase
 	private $session_token = null;
 	
 	/**
-	 * When the request must be signed with an active session, the session key to use
+	 * When the request must be signed with an active session, the session ID to use
 	 */
-	private $session_key = null;
+	private $session_id = null;
 	
 	/**
 	 * Whether the response was retrieved from the cache
@@ -85,10 +85,9 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * By providing the session information, sessions are enabled for this request. To disable
 	 * sessions, call this method with null for both values.
 	 * 
-	 * Using sessions is only supported when application authentication is used. If this is not
-	 * enabled, this method will do nothing.
+	 * Using sessions is only supported when application authentication is used.
 	 * 
-	 * @param string $token
+	 * @param string $id
 	 *   The session token to use for this request
 	 * @param string $key
 	 *   The key to use with the specified session token
@@ -96,12 +95,12 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * @throws InvalidArgumentException
 	 *   When application authentication is not used
 	 */
-	public function setSession($token, $key)
+	public function setSession($id, $key)
 	{
 		if (StreamOneConfig::$use_application_auth)
 		{
-			$this->session_token = $token;
-			$this->session_key = $key;
+			$this->session_token = $id;
+			$this->session_id = $key;
 		}
 		else
 		{
@@ -156,9 +155,9 @@ class StreamOneRequest extends StreamOneRequestBase
 			$key = StreamOneConfig::$application_key;
 
 			// Possibly add session key
-			if (isset($this->session_token) && isset($this->session_key))
+			if (isset($this->session_token) && isset($this->session_id))
 			{
-				$key .= $this->session_key;
+				$key .= $this->session_id;
 			}
 
 			return $key;
@@ -180,7 +179,7 @@ class StreamOneRequest extends StreamOneRequestBase
 			$parameters['application'] = StreamOneConfig::$application;
 
 			// Possibly add session key
-			if (isset($this->session_token) && isset($this->session_key))
+			if (isset($this->session_token) && isset($this->session_id))
 			{
 				$parameters['session'] = $this->session_token;
 			}

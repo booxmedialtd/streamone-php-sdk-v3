@@ -96,6 +96,11 @@ class StreamOneConfig
      * The caching class to use, to be instantiated below.
      */
     public static $cache;
+
+	/**
+	 * The class to use for storing session information, to be instantiated below.
+	 */
+	public static $session_store;
 }
 
 // There are various caching classes available; uncomment the desired class and its related
@@ -124,16 +129,26 @@ require_once("StreamOneFileCache.php");
 StreamOneConfig::$cache = new StreamOneFileCache("/tmp/s1_cache", 300);
 
 /**
- * MemCache caching system
- * 
+* MemCache caching system
+*
  * The MemCache caching system can connect to a MemCache daemon (memcached) to use as a cache.
  * The constructor has 3 arguments:
  * - The hostname or IP address of the memcached server
- * - The port of the memcached server on the given host/ip
- * - The number of seconds that cache items are available before they expire
- */
+* - The port of the memcached server on the given host/ip
+* - The number of seconds that cache items are available before they expire
+*/
 // require_once("StreamOneMemCache.php");
 // StreamOneConfig::$cache = new StreamOneMemCache("localhost", 12111, 300);
+
+// Which class to use for session data storage.
+
+/**
+ * PHP session storage
+ *
+ * This session store uses PHP's sessions to store session information. This will use session_start() and $_SESSION
+ */
+ require_once("StreamOnePhpSessionStore.php");
+ StreamOneConfig::$session_store = new StreamOnePhpSessionStore();
 
 /**
  * @}
