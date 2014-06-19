@@ -114,6 +114,21 @@ abstract class StreamOneRequestBase
 	}
 
 	/**
+	 * Set the timezone to use for this request
+	 *
+	 * @param DateTimeZone $time_zone
+	 *   Timezone to use for the request
+	 * @retval StreamOneRequest
+	 *   A reference to this object, to allow chaining
+	 */
+	public function setTimeZone(DateTimeZone $time_zone)
+	{
+		$this->parameters['timezone'] = $time_zone->getName();
+
+		return $this;
+	}
+
+	/**
 	 * Set the value of a single argument
 	 *
 	 * @param string $argument
