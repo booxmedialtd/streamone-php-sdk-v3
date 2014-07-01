@@ -32,9 +32,11 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 		$all_set = (isset($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
 		            isset($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
 		            isset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
+		            isset($_SESSION[self::S1_SESSION_PREFIX . 'user']) &&
 		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
 		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
-		            is_numeric($_SESSION[self::S1_SESSION_PREFIX . 'timeout']));
+		            is_numeric($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
+		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'user']));
 
 		if (!$all_set)
 		{
@@ -63,7 +65,8 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 		}
 		return array(
 			'id' => $_SESSION[self::S1_SESSION_PREFIX . 'id'],
-			'key' => $_SESSION[self::S1_SESSION_PREFIX . 'key']
+			'key' => $_SESSION[self::S1_SESSION_PREFIX . 'key'],
+			'user' => $_SESSION[self::S1_SESSION_PREFIX . 'user']
 		);
 	}
 
@@ -75,15 +78,17 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'id']);
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'key']);
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']);
+		unset($_SESSION[self::S1_SESSION_PREFIX . 'user']);
 	}
 
 	/**
 	 * @see StreamOneSessionStoreInterface::setSession()
 	 */
-	public function setSession($id, $key, $timeout)
+	public function setSession($id, $key, $user, $timeout)
 	{
 		$_SESSION[self::S1_SESSION_PREFIX . 'id'] = $id;
 		$_SESSION[self::S1_SESSION_PREFIX . 'key'] = $key;
+		$_SESSION[self::S1_SESSION_PREFIX . 'user'] = $user;
 		$_SESSION[self::S1_SESSION_PREFIX . 'timeout'] = time() + $timeout;
 	}
 

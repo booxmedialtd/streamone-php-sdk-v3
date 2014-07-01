@@ -19,7 +19,7 @@ interface StreamOneSessionStoreInterface
 	/**
 	 * Gets the current active session
 	 *
-	 * @return array An array containing the session information, having an ID and key
+	 * @return array An array containing the session information, having an ID, key and uservar
 	 */
 	public function getSession();
 
@@ -35,10 +35,12 @@ interface StreamOneSessionStoreInterface
 	 *   The ID for this session
 	 * @param string $key
 	 *   The key for this session
+	 * @param string $user
+	 *   The user ID for this session
 	 * @param int $timeout
 	 *   The number of seconds before this session becomes invalid when not doing any requests
 	 */
-	public function setSession($id, $key, $timeout);
+	public function setSession($id, $key, $user, $timeout);
 
 	/**
 	 * Update the timeout of a session

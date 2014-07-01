@@ -26,6 +26,16 @@ class StreamOneSession
 		return StreamOneConfig::$session_store->hasSession();
 	}
 
+	public function sessionUserId()
+	{
+		if (!$this->hasActiveSession())
+		{
+			return null;
+		}
+		$session = StreamOneConfig::$session_store->getSession();
+		return $session['user'];
+	}
+
 	/**
 	 * Create a new session with the StreamOne API.
 	 *
@@ -98,7 +108,7 @@ class StreamOneSession
 
 		$request_body = $request->body();
 
-		StreamOneConfig::$session_store->setSession($request_body['id'], $request_body['key'], $request_body['timeout']);
+		StreamOneConfig::$session_store->setSession($request_body['id'], $request_body['key'], $request_body['user'], $request_body['timeout']);
 
 
 		$this->success = true;
