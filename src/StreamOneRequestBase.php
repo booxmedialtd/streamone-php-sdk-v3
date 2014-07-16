@@ -96,6 +96,25 @@ abstract class StreamOneRequestBase
 	}
 
 	/**
+	 * Set the accounts to use for this request
+	 *
+	 * Some actions allow you to set more than one account at the same time. Refer to the
+	 * documentation of the action you are executing to read whether providing more than one account
+	 * is allowed or not.
+	 *
+	 * @param array $accounts
+	 *   Array with hashs of the accounts to use for the request
+	 * @retval StreamOneRequest
+	 *   A reference to this object, to allow chaining
+	 */
+	public function setAccounts(array $accounts)
+	{
+		$this->parameters['account'] = implode(',', $accounts);
+
+		return $this;
+	}
+
+	/**
 	 * Set the customer to use for this request
 	 *
 	 * Some actions require an account to be set and others have it as an alternative to an account.

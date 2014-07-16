@@ -143,6 +143,26 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
+	 * Retrieve whether this request was retrieved from cache
+	 *
+	 * @retval bool True if and only if the request was retrieved from cache
+	 */
+	public function fromCache()
+	{
+		return $this->from_cache;
+	}
+
+	/**
+	 * Retrieve the age of the item retrieved from cache
+	 *
+	 * @retval int The age of the item retrieved from cache. If not retrieved from cache, returns -1
+	 */
+	public function cacheAge()
+	{
+		return $this->cache_age;
+	}
+
+	/**
 	 * @see StreamOneRequestBase::apiUrl
 	 */
 	protected function apiUrl()
