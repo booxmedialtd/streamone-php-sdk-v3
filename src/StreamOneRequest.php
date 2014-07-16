@@ -62,6 +62,11 @@ class StreamOneRequest extends StreamOneRequestBase
 	private $from_cache = false;
 
 	/**
+	 * If the response was retrieved form the cache, how old it is
+	 */
+	private $cache_age = -1;
+
+	/**
 	 * @see StreamOneRequestBase::__construct
 	 */
 	public function __construct($command, $action)
@@ -272,6 +277,7 @@ class StreamOneRequest extends StreamOneRequestBase
 		if ($response !== false)
 		{
 			$this->from_cache = true;
+			$this->cache_age = StreamOneConfig::$cache->age($this->cacheKey());
 			return $response;
 		}
 		

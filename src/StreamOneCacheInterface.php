@@ -16,6 +16,14 @@ interface StreamOneCacheInterface
      * @return mixed Cached value of the key, or false if value not found or expired
      */
     public function get($key);
+
+    /**
+     * Get the age of a stored key
+     *
+     * @param string $key Key to get the age of
+     * @return mixed Age of the key, or false if value not found or expired
+     */
+    public function age($key);
     
     /**
      * Store a value for the given key

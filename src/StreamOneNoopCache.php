@@ -22,6 +22,17 @@ class StreamOneNoopCache implements StreamOneCacheInterface
         return false;
     }
     
+     /**
+     * Get the age of a stored key
+     *
+     * @param string $key Key to get the age of
+     * @return mixed Age of the key, or false if value not found or expired
+     */
+    public function age($key)
+    {
+        return false;
+    }
+    
     /**
      * Store a value for the given key
      * 

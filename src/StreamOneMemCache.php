@@ -45,7 +45,28 @@ class StreamOneMemCache implements StreamOneCacheInterface
      */
     public function get($key)
     {
-        return $this->memcache->get($key);
+        $value = $this->memcache->get($key);
+        if ($value === false)
+		{
+			return false;
+		}
+		return $value['data'];
+    }
+
+    /**
+     * Get the age of a stored key
+     *
+     * @param string $key Key to get the age of
+     * @return mixed Age of the key, or false if value not found or expired
+     */
+    public function age($key)
+    {
+        $value = $this->memcache->get($key);
+        if ($value === false)
+		{
+			return false;
+		}
+		return time() - $value['age'];
     }
     
     /**
@@ -58,6 +79,10 @@ class StreamOneMemCache implements StreamOneCacheInterface
      */
     public function set($key, $value)
     {
+		$value = array(
+			'data' => $value,
+			'age' => time()
+		);
         $this->memcache->set($key, $value, 0, $this->expirationTime);
     }
 }

@@ -47,30 +47,32 @@ class StreamOneFileCache implements StreamOneCacheInterface
      */
     public function get($key)
     {
-        $filename = $this->filename($key);
-        
-        if (!file_exists($filename))
-            return false;
-        
-        // Check if the file expired
-        if ((filemtime($filename) + $this->expirationTime) < time())
-        {
-            // The cache file is expired: remove it
-            @unlink($filename);
-            return false;
-        }
-        
-        $serialized = file_get_contents($filename);
-        if ($serialized === false)
-        {
-            // The cache file is unreadable; (try to) remove it
-            @unlink($filename);
-            return false;
-        }
+		$serialized = $this->getFileContents($key);
+		if (!$serialized)
+		{
+			return false;
+		}
         
         // Return unserialized contents, or false on failure (unserialize() does this already)
         return unserialize($serialized);
     }
+
+    /**
+     * Get the age of a stored key
+     *
+     * @param string $key Key to get the age of
+     * @return mixed Age of the key, or false if value not found or expired
+     */
+    public function age($key)
+    {
+		if (!$this->getFileContents($key))
+		{
+			return false;
+		}
+
+		$filename = $this->filename($key);
+        return time() - filemtime($filename);
+	}
     
     /**
      * Store a value for the given key
@@ -98,6 +100,40 @@ class StreamOneFileCache implements StreamOneCacheInterface
     {
         return $this->basedir . sha1($key);
     }
+
+    /**
+	 * Retrieve the contents for a file given by a key
+	 *
+	 * @param string $key Key to get the cached value of
+	 * @return string
+	 *   The contents of the the file for the given key or false if the file does not exist or is
+	 *   expired
+	 */
+    private function getFileContents($key)
+    {
+		$filename = $this->filename($key);
+
+        if (!file_exists($filename))
+            return false;
+
+        // Check if the file expired
+        if ((filemtime($filename) + $this->expirationTime) < time())
+        {
+            // The cache file is expired: remove it
+            @unlink($filename);
+            return false;
+        }
+
+        $serialized = file_get_contents($filename);
+        if ($serialized === false)
+        {
+            // The cache file is unreadable; (try to) remove it
+            @unlink($filename);
+            return false;
+        }
+
+        return $serialized;
+	}
 }
 
 /**
