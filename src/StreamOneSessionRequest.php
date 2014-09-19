@@ -28,9 +28,9 @@ class StreamOneSessionrequest extends StreamOneRequest
 		parent::execute();
 
 		$header = $this->header();
-		if (isset($header['session_timeout']))
+		if (isset($header['sessiontimeout']))
 		{
-			StreamOneConfig::$session_store->updateTimeout($header['session_timeout']);
+			StreamOneConfig::$session_store->updateTimeout($header['sessiontimeout']);
 		}
 	}
 }

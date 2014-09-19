@@ -90,7 +90,6 @@ class StreamOneSession
 			$request->setCustomer($customer);
 		}
 		$request->setArgument('challenge', $challenge);
-		$request->setArgument('userip', $ip);
 		$request->setArgument('response', StreamOnePassword::generatePasswordResponse($password, $salt, $challenge));
 		if ($needs_v2_hash)
 		{
