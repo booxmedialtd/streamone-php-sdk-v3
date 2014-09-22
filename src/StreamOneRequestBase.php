@@ -52,7 +52,7 @@ abstract class StreamOneRequestBase
 	/**
 	 * The protocol to use for requests
 	 */
-	protected $protocol = "http";
+	protected $protocol = null;
 
 	/**
 	 * Construct a new request
@@ -99,11 +99,11 @@ abstract class StreamOneRequestBase
 	 * Set the accounts to use for this request
 	 *
 	 * Some actions allow you to set more than one account at the same time. Refer to the
-	 * documentation of the action you are executing to read whether providing more than one account
-	 * is allowed or not.
+	 * documentation of the action you are executing to read whether providing more than one
+	 * account is allowed or not.
 	 *
 	 * @param array $accounts
-	 *   Array with hashs of the accounts to use for the request
+	 *   Array with hashes of the accounts to use for the request
 	 * @retval StreamOneRequest
 	 *   A reference to this object, to allow chaining
 	 */
@@ -133,7 +133,10 @@ abstract class StreamOneRequestBase
 	}
 
 	/**
-	 * Set the timezone to use for this request
+	 * Set the timezone to use for this request.
+	 * 
+	 * If no timezone is set, the default timezone for the actor (user or application) doing the
+	 * request is used.
 	 *
 	 * @param DateTimeZone $time_zone
 	 *   Timezone to use for the request
@@ -180,7 +183,9 @@ abstract class StreamOneRequestBase
 	}
 
 	/**
-	 * Sets the protocol to use for requests
+	 * Sets the protocol to use for requests, e.g. 'http'
+	 * 
+	 * Using this method overrides any protocol set in the API URL.
 	 *
 	 * @param $protocol string
 	 *   The protocol to use
@@ -196,13 +201,62 @@ abstract class StreamOneRequestBase
 
 	/**
 	 * Retrieves the protocol to use for requests, with trailing ://
-	 *
+	 * 
+	 * If a protocol has been set using setProtocol(), that protocol is used. Otherwise, if a
+	 * protocol is present in the API URL, that protocol is used. If neither gives a valid
+	 * protocol, the default of 'http' is used.
+	 * 
 	 * @retval string
 	 *   The protocol to use
 	 */
 	public function protocol()
 	{
-		return $this->protocol . "://";
+		if ($this->protocol !== null)
+		{
+			// Protocol overridden by setProtocol
+			return $this->protocol . '://';
+		}
+		
+		// Use protocol from API URL if given
+		$protohost = $this->getApiProtocolHost();
+		if ($protohost['protocol'] !== null)
+		{
+			return $protohost['protocol'] . '://';
+		}
+		
+		// No protocol set in any way; default to HTTP
+		return 'http://';
+	}
+	
+	/**
+	 * Retrieve the API protocol and host, as retrieved from the apiUrl() method
+	 * 
+	 * @retval array
+	 *   An array with 2 elements:
+	 *   - protocol: a string with the protocol specified in the API URL, or null if not present
+	 *   - host: a string with the host as specified in the API URL; contains basically anything
+	 *           apart from the protocol
+	 */
+	protected function getApiProtocolHost()
+	{
+		// a combination of letters, digits, plus ("+"), period ("."), or hyphen ("-")
+		$pattern = '@^([a-zA-Z0-9\+\.-]+):/?/?(.*)$@';
+		$api_url = $this->apiUrl();
+		$nr_matches = preg_match($pattern, $api_url, $matches);
+		if ($nr_matches === 1)
+		{
+			return array(
+				'protocol' => $matches[1],
+				'host' => $matches[2]
+			);
+		}
+		else // No match or error
+		{
+			return array(
+				'protocol' => null,
+				'host' => $api_url
+			);
+		}
 	}
 
 	/**
@@ -217,7 +271,8 @@ abstract class StreamOneRequestBase
 	public function execute()
 	{
 		// Gather path, signed parameters and arguments
-		$server = $this->protocol() . $this->apiUrl();
+		$protohost = $this->getApiProtocolHost();
+		$server = $this->protocol() . $protohost['host'];
 		$path = $this->path();
 		$parameters = $this->signedParameters();
 		$arguments = $this->arguments();
@@ -348,7 +403,9 @@ abstract class StreamOneRequestBase
 	public function status()
 	{
 		if (!$this->valid())
-			return 0;
+		{
+			return null;
+		}
 		return $this->response['header']['status'];
 	}
 
@@ -356,18 +413,20 @@ abstract class StreamOneRequestBase
 	 * Retrieve the status message returned for this request
 	 *
 	 * @retval string
-	 *   The status messages returned for this request, or 'invalid response' if no valid response
+	 *   The status message returned for this request, or 'invalid response' if no valid response
 	 *   was received
 	 */
 	public function statusMessage()
 	{
 		if (!$this->valid())
+		{
 			return 'invalid response';
+		}
 		return $this->response['header']['statusmessage'];
 	}
 
 	/**
-	 * This function should return the base URL of the API, without protocol or trailing /
+	 * This function returns the base URL of the API, with optional protocol and without trailing /
 	 *
 	 * Subclasses will overwrite this function to get it from the correct configuration
 	 *

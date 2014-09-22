@@ -32,9 +32,9 @@ if (!class_exists('StreamOneConfig'))
  * inspect the retrieved response.
  * 
  * \code
- * $request = new StreamOneRequest('items', 'view');
- * $request->setArgument('account', 'Mn9mdf')
- *         ->setArgument('item', 'vMD9k')
+ * $request = new StreamOneRequest('item', 'view');
+ * $request->setAccount('Mn9mdVb-02mA')
+ *         ->setArgument('item', 'vMD_9k1SmkS5')
  *         ->execute();
  * if ($request->success())
  * {
@@ -42,7 +42,13 @@ if (!class_exists('StreamOneConfig'))
  * }
  * \endcode
  *
- * This class only supports the in-development version of API v3.
+ * This class only supports version 3 of the StreamOne API. All configuration is done using the
+ * StreamOneConfig class.
+ * 
+ * This class inherits from StreamOneRequestBase, which is a very basic request-class implementing
+ * only the basics of setting arguments and parameters, and generic signing of requests. This
+ * class adds specific signing for users, applications and sessions, as well as a basic caching
+ * mechanism.
  */
 class StreamOneRequest extends StreamOneRequestBase
 {
@@ -62,9 +68,9 @@ class StreamOneRequest extends StreamOneRequestBase
 	private $from_cache = false;
 
 	/**
-	 * If the response was retrieved form the cache, how old it is
+	 * If the response was retrieved from the cache, how old it is in seconds; otherwise null
 	 */
-	private $cache_age = -1;
+	private $cache_age = null;
 
 	/**
 	 * @see StreamOneRequestBase::__construct
@@ -88,7 +94,7 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * Set the session information to use for this request
 	 * 
 	 * By providing the session information, sessions are enabled for this request. To disable
-	 * sessions, call this method with null for both values.
+	 * sessions again, call this method with null for both values.
 	 * 
 	 * Using sessions is only supported when application authentication is used.
 	 * 
@@ -116,10 +122,16 @@ class StreamOneRequest extends StreamOneRequestBase
 	/**
 	 * Execute the prepared request
 	 *
-	 * This will sign the request, send it to the Internal API server, and analyze the response. To
-	 * check whether the request was successful and returned no error, use the method success().
-	 *
-	 * It will first check if the data is still available in the cache
+	 * This method will first check if there is a cached response for this request. If there is,
+	 * the cached response is used. Otherwise, the request is signed and sent to the API server.
+	 * The response will be stored in this class for inspection, and in the cache if applicable
+	 * for this request.
+	 * 
+	 * To check whether the request was successful, use the success() method. The header and body
+	 * of the response can be obtained using the header() and body() methods of this class. A
+	 * request can be unsuccessful because either the response was invalid (check using the valid()
+	 * method), or because the status in the header was not OK / 0 (check using the status() and
+	 * statusMessage() methods.)
 	 *
 	 * @see StreamOneRequestBase::execute
 	 *
@@ -140,12 +152,15 @@ class StreamOneRequest extends StreamOneRequestBase
 		}
 
 		$this->saveCache();
+		
+		return $this;
 	}
 
 	/**
-	 * Retrieve whether this request was retrieved from cache
+	 * Retrieve whether this response was retrieved from cache
 	 *
-	 * @retval bool True if and only if the request was retrieved from cache
+	 * @retval bool
+	 *   True if and only if the response was retrieved from cache
 	 */
 	public function fromCache()
 	{
@@ -153,9 +168,11 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
-	 * Retrieve the age of the item retrieved from cache
+	 * Retrieve the age of the response retrieved from cache
 	 *
-	 * @retval int The age of the item retrieved from cache. If not retrieved from cache, returns -1
+	 * @retval int
+	 *   The age of the response retrieved from cache in seconds. If the response was not
+	 *   retrieved from cache, this will return null instead.
 	 */
 	public function cacheAge()
 	{
@@ -163,6 +180,8 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
+	 * Retrieve the URL of the StreamOne API server to use.
+	 * 
 	 * @see StreamOneRequestBase::apiUrl
 	 */
 	protected function apiUrl()
@@ -171,15 +190,18 @@ class StreamOneRequest extends StreamOneRequestBase
 	}
 
 	/**
+	 * Retrieve the key to use for signing this request.
+	 *
 	 * @see StreamOneRequestBase::signingKey
 	 */
 	protected function signingKey()
 	{
 		if (StreamOneConfig::$use_application_auth)
 		{
+			// Application authentication: return the application pre-shared key, with the session
+			// key appended if a session is currently active.
 			$key = StreamOneConfig::$application_key;
 
-			// Possibly add session key
 			if (isset($this->session_token) && isset($this->session_id))
 			{
 				$key .= $this->session_id;
@@ -189,11 +211,14 @@ class StreamOneRequest extends StreamOneRequestBase
 		}
 		else
 		{
+			// User authentication: return the user pre-shared key.
 			return StreamOneConfig::$user_key;
 		}
 	}
 
 	/**
+	 * Retrieve the parameters to include for signing this request.
+	 *
 	 * @see StreamOneRequestBase::parametersForSigning
 	 */
 	protected function parametersForSigning()
@@ -226,29 +251,26 @@ class StreamOneRequest extends StreamOneRequestBase
 	
 	/**
 	 * Handle a plain-text response as received from the API
-	 *
-	 * If the header contains an error status code set in StreamOneConfig::$visible_errors, a clear error will be
-	 * shown on the screen
+	 * 
+	 * If the request was valid and contains one of the status codes set in
+	 * StreamOneConfig::$visible_errors, a very noticable error message will be shown on the
+	 * screen. It is advisable that these errors are handled and logged in a less visible manner,
+	 * and that the visible_errors configuration variable is then set to an empty array. This is
+	 * not done by default to aid in catching these errors during development.
 	 *
 	 * @see StreamOneRequestBase::handleResponse
 	 * 
 	 * @param mixed $response
-	 *   The plain-text response as received from the API; parsing will not be succesful if this is
-	 *   not a string.
+	 *   The plain-text response as received from the API
 	 */
 	protected function handleResponse($response)
 	{
 		parent::handleResponse($response);
 
-		// Only attempt handling the response if it is a string
-		if (is_string($response))
+		// Check if the response was valid and the status code is one of the visible errors
+		if ($this->valid() && in_array($this->status()), StreamOneConfig::$visible_errors))
 		{
-			// Check the resulting header to see if we have a general error; report them
-			$header = $this->header();
-			if (in_array($header['status'], StreamOneConfig::$visible_errors))
-			{
-				echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $header['status'] . ': <em>' . htmlspecialchars($header['statusmessage']) . '</em></div>';
-			}
+			echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $this->status() . ': <em>' . $this->statusMessage() . '</em></div>';
 		}
 	}
 	

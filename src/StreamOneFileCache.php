@@ -61,17 +61,19 @@ class StreamOneFileCache implements StreamOneCacheInterface
      * Get the age of a stored key
      *
      * @param string $key Key to get the age of
-     * @return mixed Age of the key, or false if value not found or expired
+     * @return mixed Age of the key in seconds, or false if value not found or expired
      */
     public function age($key)
     {
-		if (!$this->getFileContents($key))
+		$filename = $this->filename($key);
+		if (!file_exists($filename))
 		{
 			return false;
 		}
-
-		$filename = $this->filename($key);
-        return time() - filemtime($filename);
+		else
+		{
+			return time() - filemtime($filename);
+		}
 	}
     
     /**
