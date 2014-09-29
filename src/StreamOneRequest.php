@@ -268,7 +268,7 @@ class StreamOneRequest extends StreamOneRequestBase
 		parent::handleResponse($response);
 
 		// Check if the response was valid and the status code is one of the visible errors
-		if ($this->valid() && in_array($this->status()), StreamOneConfig::$visible_errors))
+		if ($this->valid() && in_array($this->status(), StreamOneConfig::$visible_errors))
 		{
 			echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $this->status() . ': <em>' . $this->statusMessage() . '</em></div>';
 		}
