@@ -259,6 +259,18 @@ abstract class StreamOneRequestBase
 		}
 	}
 
+	protected function prepareExecute()
+	{
+		// Gather path, signed parameters and arguments
+		$protohost = $this->getApiProtocolHost();
+		$server = $this->protocol() . $protohost['host'];
+		$path = $this->path();
+		$parameters = $this->signedParameters();
+		$arguments = $this->arguments();
+
+		return array($server, $path, $parameters, $arguments);
+	}
+
 	/**
 	 * Execute the prepared request
 	 *
@@ -270,12 +282,7 @@ abstract class StreamOneRequestBase
 	 */
 	public function execute()
 	{
-		// Gather path, signed parameters and arguments
-		$protohost = $this->getApiProtocolHost();
-		$server = $this->protocol() . $protohost['host'];
-		$path = $this->path();
-		$parameters = $this->signedParameters();
-		$arguments = $this->arguments();
+		list($server, $path, $parameters, $arguments) = $this->prepareExecute();
 
 		// Actually execute the request
 		$response = $this->sendRequest($server, $path, $parameters, $arguments);
