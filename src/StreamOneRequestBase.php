@@ -240,30 +240,21 @@ abstract class StreamOneRequestBase
 	protected function getApiProtocolHost()
 	{
 		// a combination of letters, digits, plus ("+"), period ("."), or hyphen ("-")
-		$pattern = '@^([a-zA-Z0-9\+\.-]+):/?/?(.*)$@';
+		$pattern = '@^(?:([a-zA-Z0-9\+\.-]+):/?/?)?([^/]*)(.*)$@';
 		$api_url = $this->apiUrl();
-		$nr_matches = preg_match($pattern, $api_url, $matches);
-		if ($nr_matches === 1)
-		{
-			return array(
-				'protocol' => $matches[1],
-				'host' => $matches[2]
-			);
-		}
-		else // No match or error
-		{
-			return array(
-				'protocol' => null,
-				'host' => $api_url
-			);
-		}
+		preg_match($pattern, $api_url, $matches);
+		return array(
+			'protocol' => (strlen($matches[1]) == 0) ? null : $matches[1],
+			'host' => $matches[2],
+			'prefix' => $matches[3],
+		);
 	}
 
 	protected function prepareExecute()
 	{
 		// Gather path, signed parameters and arguments
 		$protohost = $this->getApiProtocolHost();
-		$server = $this->protocol() . $protohost['host'];
+		$server = $this->protocol() . $protohost['host'] . $protohost['prefix'];
 		$path = $this->path();
 		$parameters = $this->signedParameters();
 		$arguments = $this->arguments();
