@@ -107,7 +107,9 @@ class StreamOneSession
 
 		$request_body = $request->body();
 
-		StreamOneConfig::$session_store->setSession($request_body['id'], $request_body['key'], $request_body['user'], $request_body['timeout']);
+		StreamOneConfig::$session_store->setSession($request_body['id'], $request_body['key'],
+													$request_body['user'], $request_body['renew'],
+													$request_body['timeout']);
 
 
 		$this->success = true;

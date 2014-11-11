@@ -37,10 +37,20 @@ interface StreamOneSessionStoreInterface
 	 *   The key for this session
 	 * @param string $user
 	 *   The user ID for this session
+	 * @param int $renew
+	 *   The number of seconds after when this session needs to be renwed
 	 * @param int $timeout
 	 *   The number of seconds before this session becomes invalid when not doing any requests
 	 */
-	public function setSession($id, $key, $user, $timeout);
+	public function setSession($id, $key, $user, $renew, $timeout);
+
+	/**
+	 * Update the renew moment of a session
+	 *
+	 * @param int $renew
+	 *   The new renew moment for the active session
+	 */
+	public function updateRenew($renew);
 
 	/**
 	 * Update the timeout of a session

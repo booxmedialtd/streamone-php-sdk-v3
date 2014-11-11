@@ -28,6 +28,10 @@ class StreamOneSessionrequest extends StreamOneRequest
 		parent::execute();
 
 		$header = $this->header();
+		if (isset($header['sessionrenew']))
+		{
+			StreamOneConfig::$session_store->updateRenew($header['sessionrenew']);
+		}
 		if (isset($header['sessiontimeout']))
 		{
 			StreamOneConfig::$session_store->updateTimeout($header['sessiontimeout']);
