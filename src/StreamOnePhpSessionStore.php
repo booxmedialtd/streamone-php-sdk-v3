@@ -25,18 +25,16 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @see StreamOneSessionStoreInterface::hasSession()
+	 * @copydoc StreamOneSessionStoreInterface::hasSession()
 	 */
 	public function hasSession()
 	{
 		$all_set = (isset($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
 		            isset($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
-		            isset($_SESSION[self::S1_SESSION_PREFIX . 'renew']) &&
 		            isset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
 		            isset($_SESSION[self::S1_SESSION_PREFIX . 'user']) &&
 		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
 		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
-		            is_numeric($_SESSION[self::S1_SESSION_PREFIX . 'renew']) &&
 		            is_numeric($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
 		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'user']));
 
@@ -45,7 +43,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 			return false;
 		}
 
-		if ($_SESSION[self::S1_SESSION_PREFIX . 'timeout'] >= time())
+		if ($_SESSION[self::S1_SESSION_PREFIX . 'timeout'] > time())
 		{
 			return true;
 		}
@@ -53,63 +51,71 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 		{
 			$this->clearSession();
 		}
+		
 		return false;
 	}
 
 	/**
-	 * @see StreamOneSessionStoreInterface::getSession()
-	 */
-	public function getSession()
-	{
-		if (!$this->hasSession())
-		{
-			throw new Exception("No active session");
-		}
-		return array(
-			'id' => $_SESSION[self::S1_SESSION_PREFIX . 'id'],
-			'key' => $_SESSION[self::S1_SESSION_PREFIX . 'key'],
-			'user' => $_SESSION[self::S1_SESSION_PREFIX . 'user']
-		);
-	}
-
-	/**
-	 * @see StreamOneSessionStoreInterface::getSession()
+	 * @copydoc StreamOneSessionStoreInterface::clearSession()
 	 */
 	public function clearSession()
 	{
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'id']);
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'key']);
-		unset($_SESSION[self::S1_SESSION_PREFIX . 'renew']);
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']);
 		unset($_SESSION[self::S1_SESSION_PREFIX . 'user']);
 	}
 
 	/**
-	 * @see StreamOneSessionStoreInterface::setSession()
+	 * @copydoc StreamOneSessionStoreInterface::setSession()
 	 */
-	public function setSession($id, $key, $user, $renew, $timeout)
+	public function setSession($id, $key, $user_id, $timeout)
 	{
 		$_SESSION[self::S1_SESSION_PREFIX . 'id'] = $id;
 		$_SESSION[self::S1_SESSION_PREFIX . 'key'] = $key;
-		$_SESSION[self::S1_SESSION_PREFIX . 'user'] = $user;
-		$_SESSION[self::S1_SESSION_PREFIX . 'renew'] = time() + $renew;
+		$_SESSION[self::S1_SESSION_PREFIX . 'user'] = $user_id;
 		$_SESSION[self::S1_SESSION_PREFIX . 'timeout'] = time() + $timeout;
 	}
 
 	/**
-	 * @see StreamOneSessionStoreInterface::updateRenew()
+	 * @copydoc StreamOneSessionStoreInterface::setTimeout()
 	 */
-	public function updateRenew($renew)
-	{
-		$_SESSION[self::S1_SESSION_PREFIX . 'renew'] = time() + $renew;
-	}
-
-	/**
-	 * @see StreamOneSessionStoreInterface::updateTimeout()
-	 */
-	public function updateTimeout($timeout)
+	public function setTimeout($timeout)
 	{
 		$_SESSION[self::S1_SESSION_PREFIX . 'timeout'] = time() + $timeout;
+	}
+	
+	/**
+	 * @copydoc StreamOneSessionStoreInterface::getId()
+	 */
+	public function getId()
+	{
+		return $_SESSION[self::S1_SESSION_PREFIX . 'id'];
+	}
+	
+	/**
+	 * @copydoc StreamOneSessionStoreInterface::getKey()
+	 */
+	public function getKey()
+	{
+		return $_SESSION[self::S1_SESSION_PREFIX . 'key'];
+	}
+	
+	/**
+	 * @copydoc StreamOneSessionStoreInterface::getUserId()
+	 */
+	public function getUserId()
+	{
+		return $_SESSION[self::S1_SESSION_PREFIX . 'user'];
+	}
+	
+	/**
+	 * @copydoc StreamOneSessionStoreInterface::getTimeout()
+	 */
+	public function getTimeout()
+	{
+		// Return difference between timeout moment and now
+		return ($_SESSION[self::S1_SESSION_PREFIX . 'timeout'] - time());
 	}
 }
 

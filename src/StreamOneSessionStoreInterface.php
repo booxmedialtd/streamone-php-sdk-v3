@@ -17,13 +17,6 @@ interface StreamOneSessionStoreInterface
 	public function hasSession();
 
 	/**
-	 * Gets the current active session
-	 *
-	 * @return array An array containing the session information, having an ID, key and uservar
-	 */
-	public function getSession();
-
-	/**
 	 * Clears the current active session
 	 */
 	public function clearSession();
@@ -35,30 +28,60 @@ interface StreamOneSessionStoreInterface
 	 *   The ID for this session
 	 * @param string $key
 	 *   The key for this session
-	 * @param string $user
+	 * @param string $user_id
 	 *   The user ID for this session
-	 * @param int $renew
-	 *   The number of seconds after when this session needs to be renwed
 	 * @param int $timeout
 	 *   The number of seconds before this session becomes invalid when not doing any requests
 	 */
-	public function setSession($id, $key, $user, $renew, $timeout);
-
-	/**
-	 * Update the renew moment of a session
-	 *
-	 * @param int $renew
-	 *   The new renew moment for the active session
-	 */
-	public function updateRenew($renew);
-
+	public function setSession($id, $key, $user_id, $timeout);
+	
 	/**
 	 * Update the timeout of a session
 	 *
 	 * @param int $timeout
-	 *   The new timeout for the active session
+	 *   The new timeout for the active session, in seconds from now
 	 */
-	public function updateTimeout($timeout);
+	public function setTimeout($timeout);
+	
+	/**
+	 * Retrieve the current session ID
+	 * 
+	 * The behavior of this function is undefined if there is no active session.
+	 * 
+	 * @retval string
+	 *   The current session ID
+	 */
+	public function getId();
+	
+	/**
+	 * Retrieve the current session key
+	 * 
+	 * The behavior of this function is undefined if there is no active session.
+	 * 
+	 * @retval string
+	 *   The current session key
+	 */
+	public function getKey();
+	
+	/**
+	 * Retrieve the ID of the user logged in with the current session
+	 * 
+	 * The behavior of this function is undefined if there is no active session.
+	 * 
+	 * @retval string
+	 *   Retrieve the ID of the user logged in with the current session
+	 */
+	public function getUserId();
+	
+	/**
+	 * Retrieve the current session timeout
+	 * 
+	 * The behavior of this function is undefined if there is no active session.
+	 * 
+	 * @retval int
+	 *   The number of seconds before this session expires; negative if the session has expired
+	 */
+	public function getTimeout();
 }
 
 /**

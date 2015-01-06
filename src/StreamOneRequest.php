@@ -53,16 +53,6 @@ if (!class_exists('StreamOneConfig'))
 class StreamOneRequest extends StreamOneRequestBase
 {
 	/**
-	 * When the request must be signed with an active session, the session token to use
-	 */
-	private $session_token = null;
-	
-	/**
-	 * When the request must be signed with an active session, the session ID to use
-	 */
-	private $session_id = null;
-	
-	/**
 	 * Whether the response was retrieved from the cache
 	 */
 	private $from_cache = false;
@@ -87,35 +77,6 @@ class StreamOneRequest extends StreamOneRequestBase
 		else // user authentication
 		{
 			$this->parameters['authentication_type'] = 'user';
-		}
-	}
-	
-	/**
-	 * Set the session information to use for this request
-	 * 
-	 * By providing the session information, sessions are enabled for this request. To disable
-	 * sessions again, call this method with null for both values.
-	 * 
-	 * Using sessions is only supported when application authentication is used.
-	 * 
-	 * @param string $id
-	 *   The session token to use for this request
-	 * @param string $key
-	 *   The key to use with the specified session token
-	 *
-	 * @throws InvalidArgumentException
-	 *   When application authentication is not used
-	 */
-	public function setSession($id, $key)
-	{
-		if (StreamOneConfig::$use_application_auth)
-		{
-			$this->session_token = $id;
-			$this->session_id = $key;
-		}
-		else
-		{
-			throw new InvalidArgumentException("Sessions are only supported when application authentication is used");
 		}
 	}
 
@@ -198,16 +159,8 @@ class StreamOneRequest extends StreamOneRequestBase
 	{
 		if (StreamOneConfig::$use_application_auth)
 		{
-			// Application authentication: return the application pre-shared key, with the session
-			// key appended if a session is currently active.
-			$key = StreamOneConfig::$application_key;
-
-			if (isset($this->session_token) && isset($this->session_id))
-			{
-				$key .= $this->session_id;
-			}
-
-			return $key;
+			// Application authentication: return the application pre-shared key
+			return StreamOneConfig::$application_key;
 		}
 		else
 		{
@@ -224,26 +177,21 @@ class StreamOneRequest extends StreamOneRequestBase
 	protected function parametersForSigning()
 	{
 		$parameters = parent::parametersForSigning();
+		
 		if (StreamOneConfig::$use_application_auth)
 		{
 			$parameters['application'] = StreamOneConfig::$application;
-
-			// Possibly add session key
-			if (isset($this->session_token) && isset($this->session_id))
-			{
-				$parameters['session'] = $this->session_token;
-			}
 		}
 		else
 		{
 			$parameters['user'] = StreamOneConfig::$user;
+		}
 
-			// Check if a default account is specified
-			if (!isset($parameters['account']) && !isset($parameters['customer']) &&
-			    isset(StreamOneConfig::$default_account))
-			{
-				$parameters['account'] = StreamOneConfig::$default_account;
-			}
+		// Check if a default account is specified, and it is not overridden for this request
+		if (!isset($parameters['account']) && !isset($parameters['customer']) &&
+		    isset(StreamOneConfig::$default_account))
+		{
+			$parameters['account'] = StreamOneConfig::$default_account;
 		}
 
 		return $parameters;

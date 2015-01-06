@@ -5,6 +5,15 @@
  * @{
  */
 
+/**
+ * The base class for StreamOneRequest, abstracting authentication details
+ * 
+ * This abstract class provides the basics for doing reqeusts to the StreamOne API, and abstracts
+ * the authentication details. This allows for subclasses that just implement a valid
+ * authentication scheme, without having to re-implement al the basics of doing requests. For
+ * normal use, the StreamOneRequest class provides authentication using users or applications,
+ * and StreamOneSessionRequest provides authentication for requests executed within a session.
+ */
 abstract class StreamOneRequestBase
 {
 	/**
@@ -156,7 +165,7 @@ abstract class StreamOneRequestBase
 	 * @param string $argument
 	 *   The name of the argument
 	 * @param string $value
-	 *   The new value for the argument
+	 *   The new value for the argument; null will be translated to an empty string
 	 * @retval StreamOneRequest
 	 *   A reference to this object, to allow chaining
 	 */
@@ -185,7 +194,9 @@ abstract class StreamOneRequestBase
 	/**
 	 * Sets the protocol to use for requests, e.g. 'http'
 	 * 
-	 * Using this method overrides any protocol set in the API URL.
+	 * Using this method overrides any protocol set in the API URL. The protocol must not
+	 * contain trailing '://', even though the protocol() method returns protocols with '://'
+	 * appended.
 	 *
 	 * @param $protocol string
 	 *   The protocol to use
@@ -205,6 +216,10 @@ abstract class StreamOneRequestBase
 	 * If a protocol has been set using setProtocol(), that protocol is used. Otherwise, if a
 	 * protocol is present in the API URL, that protocol is used. If neither gives a valid
 	 * protocol, the default of 'http' is used.
+	 * 
+	 * This method returns the protocol with trailing '://', while setProtocol() requires
+	 * a protocol without trailing '://'. For example, when the protocol is set to 'https',
+	 * 
 	 * 
 	 * @retval string
 	 *   The protocol to use
@@ -231,11 +246,20 @@ abstract class StreamOneRequestBase
 	/**
 	 * Retrieve the API protocol and host, as retrieved from the apiUrl() method
 	 * 
+	 * The API URL is split into up to 3 parts, the protocol, host and prefix. The following
+	 * forms of URLs, as provided by apiUrl(), are supported:
+	 * 
+	 * - `protocol://host/prefix`
+	 * - `protocol://host`
+	 * - `host/prefix`
+	 * - `host`
+	 * 
 	 * @retval array
-	 *   An array with 2 elements:
+	 *   An array with 3 elements:
 	 *   - protocol: a string with the protocol specified in the API URL, or null if not present
-	 *   - host: a string with the host as specified in the API URL; contains basically anything
-	 *           apart from the protocol
+	 *   - host: a string with the host as specified in the API URL
+	 *   - prefix: a possibly empty string with the path prefix of the URL;  contains basically
+	 *             everything after the host
 	 */
 	protected function getApiProtocolHost()
 	{
@@ -250,6 +274,17 @@ abstract class StreamOneRequestBase
 		);
 	}
 
+	/**
+	 * Gather the server, path, parameters, and arguments for the request to execute
+	 * 
+	 * @retval array
+	 *   An array with 4 elements:
+	 *   - The server (`protocol://host/prefix`) to send the request to
+	 *   - The path of the request (`/api/command/action`)
+	 *   - The parameters for the request, as a key=>value array, including the parameters
+	 *       required for authentication
+	 *   - The arguments for the request, as a key=>value array
+	 */
 	protected function prepareExecute()
 	{
 		// Gather path, signed parameters and arguments
