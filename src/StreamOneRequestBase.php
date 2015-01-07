@@ -8,9 +8,9 @@
 /**
  * The base class for StreamOneRequest, abstracting authentication details
  * 
- * This abstract class provides the basics for doing reqeusts to the StreamOne API, and abstracts
+ * This abstract class provides the basics for doing requests to the StreamOne API, and abstracts
  * the authentication details. This allows for subclasses that just implement a valid
- * authentication scheme, without having to re-implement al the basics of doing requests. For
+ * authentication scheme, without having to re-implement all the basics of doing requests. For
  * normal use, the StreamOneRequest class provides authentication using users or applications,
  * and StreamOneSessionRequest provides authentication for requests executed within a session.
  */
