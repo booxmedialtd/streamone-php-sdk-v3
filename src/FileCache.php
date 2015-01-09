@@ -4,12 +4,12 @@
  * @{
  */
  
-require_once("StreamOneCacheInterface.php");
+namespace StreamOne\API\v3;
 
 /**
  * A caching implementation using files on disk
  */
-class StreamOneFileCache implements StreamOneCacheInterface
+class FileCache implements CacheInterface
 {
     /**
      * Base directory to store cache files in
@@ -22,7 +22,7 @@ class StreamOneFileCache implements StreamOneCacheInterface
     private $expirationTime = 300;
     
     /**
-     * Construct a StreamOneFileCache
+     * Construct a FileCache
      * 
      * @param string $basedir Base directory to store cache files in, not ending in a /
      * @param int $expiretime Time (in seconds) before a cache item expires

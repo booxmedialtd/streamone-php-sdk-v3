@@ -4,10 +4,12 @@
  * @{
  */
 
+namespace StreamOne\API\v3;
+
 /**
  * Interface for session storage
  */
-interface StreamOneSessionStoreInterface
+interface SessionStoreInterface
 {
 	/**
 	 * Determines if there is an active session

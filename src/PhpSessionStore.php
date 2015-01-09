@@ -4,12 +4,12 @@
  * @{
  */
 
-require_once('StreamOneSessionStoreInterface.php');
+namespace StreamOne\API\v3;
 
 /**
  * PHP session storage class
  */
-class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
+class PhpSessionStore implements SessionStoreInterface
 {
 	const S1_SESSION_PREFIX = 'streamone_session_';
 
@@ -25,7 +25,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::hasSession()
+	 * @copydoc SessionStoreInterface::hasSession()
 	 */
 	public function hasSession()
 	{
@@ -56,7 +56,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::clearSession()
+	 * @copydoc SessionStoreInterface::clearSession()
 	 */
 	public function clearSession()
 	{
@@ -67,7 +67,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::setSession()
+	 * @copydoc SessionStoreInterface::setSession()
 	 */
 	public function setSession($id, $key, $user_id, $timeout)
 	{
@@ -78,7 +78,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::setTimeout()
+	 * @copydoc SessionStoreInterface::setTimeout()
 	 */
 	public function setTimeout($timeout)
 	{
@@ -86,7 +86,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getId()
+	 * @copydoc SessionStoreInterface::getId()
 	 */
 	public function getId()
 	{
@@ -94,7 +94,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getKey()
+	 * @copydoc SessionStoreInterface::getKey()
 	 */
 	public function getKey()
 	{
@@ -102,7 +102,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getUserId()
+	 * @copydoc SessionStoreInterface::getUserId()
 	 */
 	public function getUserId()
 	{
@@ -110,7 +110,7 @@ class StreamOnePhpSessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getTimeout()
+	 * @copydoc SessionStoreInterface::getTimeout()
 	 */
 	public function getTimeout()
 	{

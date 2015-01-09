@@ -1,19 +1,20 @@
 <?php
 /**
- * @addtogroup StreamOneSDK The StreamOne SDK
- *
+ * @addtogroup StreamOneSDK
  * @{
  */
+
+namespace StreamOne\API\v3;
 
 /**
  * Execute a request to the StreamOne API with an active session
  * 
  * Note that it is only possible to use sessions when application authentication is enabled
- * in StreamOneConfig. Trying to use sessions with user authentication will always result in
+ * in Config. Trying to use sessions with user authentication will always result in
  * an authentication error. Refer to the StreamOne Platform Documentation on Sessions for more
  * information on using sessions.
  */
-class StreamOneSessionRequest extends StreamOneRequest
+class SessionRequest extends Request
 {
 	/// The session store containing the required session information
 	private $session_store;
@@ -25,18 +26,18 @@ class StreamOneSessionRequest extends StreamOneRequest
 	 *   The command to execute
 	 * @param string $action
 	 *   The action to execute
-	 * @param StreamOneSessionStoreInterface $session_store
+	 * @param SessionStoreInterface $session_store
 	 *   The session store containing the required session information
 	 * 
 	 * @throw InvalidArgumentException
 	 *   Application authentication is not in use; it is required to use application
 	 *   authentication for sessions to function
 	 * 
-	 * @see StreamOneRequestBase::__construct
+	 * @see RequestBase::__construct
 	 */
-	public function __construct($command, $action, StreamOneSessionStoreInterface $session_store)
+	public function __construct($command, $action, SessionStoreInterface $session_store)
 	{
-		if (!StreamOneConfig::$use_application_auth)
+		if (!Config::$use_application_auth)
 		{
 			throw new InvalidArgumentException("Sessions are only supported when application authentication is used");
 		}
@@ -84,7 +85,7 @@ class StreamOneSessionRequest extends StreamOneRequest
 	 * After executing the request in the regular way, the retrieved headers are inspected
 	 * and the session timeout is updated according to the new retrieved timeout.
 	 *
-	 * @see StreamOneRequestBase::execute
+	 * @see RequestBase::execute
 	 */
 	public function execute()
 	{

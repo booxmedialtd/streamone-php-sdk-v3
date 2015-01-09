@@ -13,14 +13,7 @@
  * @{
  */
 
-// Include the base class
-require_once('StreamOneRequestBase.php');
-
-// Include configuration file, if no configuration has been defined yet
-if (!class_exists('StreamOneConfig'))
-{
-	require_once('StreamOneConfig.php');
-}
+namespace StreamOne\API\v3;
 
 /**
  * Execute a request to the StreamOne API
@@ -32,6 +25,7 @@ if (!class_exists('StreamOneConfig'))
  * inspect the retrieved response.
  * 
  * \code
+ * use StreamOne\API\v3\Request as StreamOneRequest;
  * $request = new StreamOneRequest('item', 'view');
  * $request->setAccount('Mn9mdVb-02mA')
  *         ->setArgument('item', 'vMD_9k1SmkS5')
@@ -43,14 +37,14 @@ if (!class_exists('StreamOneConfig'))
  * \endcode
  *
  * This class only supports version 3 of the StreamOne API. All configuration is done using the
- * StreamOneConfig class.
+ * Config class.
  * 
- * This class inherits from StreamOneRequestBase, which is a very basic request-class implementing
+ * This class inherits from RequestBase, which is a very basic request-class implementing
  * only the basics of setting arguments and parameters, and generic signing of requests. This
  * class adds specific signing for users, applications and sessions, as well as a basic caching
  * mechanism.
  */
-class StreamOneRequest extends StreamOneRequestBase
+class Request extends RequestBase
 {
 	/**
 	 * Whether the response was retrieved from the cache
@@ -63,14 +57,14 @@ class StreamOneRequest extends StreamOneRequestBase
 	private $cache_age = null;
 
 	/**
-	 * @see StreamOneRequestBase::__construct
+	 * @see RequestBase::__construct
 	 */
 	public function __construct($command, $action)
 	{
 		parent::__construct($command, $action);
 		
 		// Check whether to use application authentication
-		if (StreamOneConfig::$use_application_auth)
+		if (Config::$use_application_auth)
 		{
 			$this->parameters['authentication_type'] = 'application';
 		}
@@ -94,9 +88,9 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * method), or because the status in the header was not OK / 0 (check using the status() and
 	 * statusMessage() methods.)
 	 *
-	 * @see StreamOneRequestBase::execute
+	 * @see RequestBase::execute
 	 *
-	 * @retval StreamOneRequest
+	 * @retval Request
 	 *   A reference to this object, to allow chaining
 	 */
 	public function execute()
@@ -143,55 +137,55 @@ class StreamOneRequest extends StreamOneRequestBase
 	/**
 	 * Retrieve the URL of the StreamOne API server to use.
 	 * 
-	 * @see StreamOneRequestBase::apiUrl
+	 * @see RequestBase::apiUrl
 	 */
 	protected function apiUrl()
 	{
-		return StreamOneConfig::$api_url;
+		return Config::$api_url;
 	}
 
 	/**
 	 * Retrieve the key to use for signing this request.
 	 *
-	 * @see StreamOneRequestBase::signingKey
+	 * @see RequestBase::signingKey
 	 */
 	protected function signingKey()
 	{
-		if (StreamOneConfig::$use_application_auth)
+		if (Config::$use_application_auth)
 		{
 			// Application authentication: return the application pre-shared key
-			return StreamOneConfig::$application_key;
+			return Config::$application_key;
 		}
 		else
 		{
 			// User authentication: return the user pre-shared key.
-			return StreamOneConfig::$user_key;
+			return Config::$user_key;
 		}
 	}
 
 	/**
 	 * Retrieve the parameters to include for signing this request.
 	 *
-	 * @see StreamOneRequestBase::parametersForSigning
+	 * @see RequestBase::parametersForSigning
 	 */
 	protected function parametersForSigning()
 	{
 		$parameters = parent::parametersForSigning();
 		
-		if (StreamOneConfig::$use_application_auth)
+		if (Config::$use_application_auth)
 		{
-			$parameters['application'] = StreamOneConfig::$application;
+			$parameters['application'] = Config::$application;
 		}
 		else
 		{
-			$parameters['user'] = StreamOneConfig::$user;
+			$parameters['user'] = Config::$user;
 		}
 
 		// Check if a default account is specified, and it is not overridden for this request
 		if (!isset($parameters['account']) && !isset($parameters['customer']) &&
-		    isset(StreamOneConfig::$default_account))
+		    isset(Config::$default_account))
 		{
-			$parameters['account'] = StreamOneConfig::$default_account;
+			$parameters['account'] = Config::$default_account;
 		}
 
 		return $parameters;
@@ -201,12 +195,12 @@ class StreamOneRequest extends StreamOneRequestBase
 	 * Handle a plain-text response as received from the API
 	 * 
 	 * If the request was valid and contains one of the status codes set in
-	 * StreamOneConfig::$visible_errors, a very noticable error message will be shown on the
+	 * Config::$visible_errors, a very noticable error message will be shown on the
 	 * screen. It is advisable that these errors are handled and logged in a less visible manner,
 	 * and that the visible_errors configuration variable is then set to an empty array. This is
 	 * not done by default to aid in catching these errors during development.
 	 *
-	 * @see StreamOneRequestBase::handleResponse
+	 * @see RequestBase::handleResponse
 	 * 
 	 * @param mixed $response
 	 *   The plain-text response as received from the API
@@ -216,7 +210,7 @@ class StreamOneRequest extends StreamOneRequestBase
 		parent::handleResponse($response);
 
 		// Check if the response was valid and the status code is one of the visible errors
-		if ($this->valid() && in_array($this->status(), StreamOneConfig::$visible_errors))
+		if ($this->valid() && in_array($this->status(), Config::$visible_errors))
 		{
 			echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $this->status() . ': <em>' . $this->statusMessage() . '</em></div>';
 		}
@@ -262,12 +256,12 @@ class StreamOneRequest extends StreamOneRequestBase
 	 */
 	protected function retrieveCache()
 	{
-		$response = StreamOneConfig::$cache->get($this->cacheKey());
+		$response = Config::$cache->get($this->cacheKey());
 		
 		if ($response !== false)
 		{
 			$this->from_cache = true;
-			$this->cache_age = StreamOneConfig::$cache->age($this->cacheKey());
+			$this->cache_age = Config::$cache->age($this->cacheKey());
 			return $response;
 		}
 		
@@ -285,7 +279,7 @@ class StreamOneRequest extends StreamOneRequestBase
 	{
 		if ($this->cacheable() && !$this->from_cache)
 		{
-			StreamOneConfig::$cache->set($this->cacheKey(), $this->plainResponse());
+			Config::$cache->set($this->cacheKey(), $this->plainResponse());
 		}
 	}
 }

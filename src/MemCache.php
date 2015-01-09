@@ -4,12 +4,12 @@
  * @{
  */
 
-require_once("StreamOneCacheInterface.php");
+namespace StreamOne\API\v3;
 
 /**
  * A caching implementation using MemCache
  */
-class StreamOneMemCache implements StreamOneCacheInterface
+class MemCache implements CacheInterface
 {
     /**
      * Base directory to store cache files in
@@ -22,7 +22,7 @@ class StreamOneMemCache implements StreamOneCacheInterface
     private $expirationTime = 3600;
     
     /**
-     * Construct a StreamOneMemCache
+     * Construct a MemCache
      * 
      * @param string $host The host where memcached is listening for connections
      * @param int $port The port where memcached is listening for connections

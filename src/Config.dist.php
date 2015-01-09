@@ -4,12 +4,14 @@
  * @{
  */
 
+namespace StreamOne\API\v3;
+
 /**
  * This class contains the configuration options for the StreamOne related
  * classes. To change the configuration options, adjust the values of the
  * class member variables below.
  */
-class StreamOneConfig
+class Config
 {
     /**
      * The URL at which the StreamOne API is available. There is usually no
@@ -34,7 +36,7 @@ class StreamOneConfig
 	 * 
 	 * When set to true, requests will be made signed with the application specified in
 	 * $application, using the preshared key specified in $application_key. To allow users to
-	 * create sessions (using the StreamOneSession class), it is required to use application
+	 * create sessions (using the Session class), it is required to use application
 	 * authentication.
      */
     public static $use_application_auth = false;
@@ -113,8 +115,7 @@ class StreamOneConfig
  * The noop caching system (where 'noop' stands for 'no operation') is a caching class which
  * does not cache any requests. Use this caching class to avoid using any caching at all.
  */
-// require_once("StreamOneNoopCache.php");
-// StreamOneConfig::$cache = new StreamOneNoopCache();
+// Config::$cache = new NoopCache();
 
 /**
  * File caching system
@@ -125,20 +126,18 @@ class StreamOneConfig
  *     This directory will be created if it does not exist yet
  * - The number of seconds that cache items are available before they expire
  */
-require_once("StreamOneFileCache.php");
-StreamOneConfig::$cache = new StreamOneFileCache("/tmp/s1_cache", 300);
+Config::$cache = new FileCache("/tmp/s1_cache", 300);
 
 /**
-* MemCache caching system
-*
+ * MemCache caching system
+ *
  * The MemCache caching system can connect to a MemCache daemon (memcached) to use as a cache.
  * The constructor has 3 arguments:
  * - The hostname or IP address of the memcached server
-* - The port of the memcached server on the given host/ip
-* - The number of seconds that cache items are available before they expire
-*/
-// require_once("StreamOneMemCache.php");
-// StreamOneConfig::$cache = new StreamOneMemCache("localhost", 12111, 300);
+ * - The port of the memcached server on the given host/ip
+ * - The number of seconds that cache items are available before they expire
+ */
+// Config::$cache = new MemCache("localhost", 12111, 300);
 
 // Which class to use for session data storage.
 
@@ -147,8 +146,7 @@ StreamOneConfig::$cache = new StreamOneFileCache("/tmp/s1_cache", 300);
  *
  * This session store uses PHP's sessions to store session information. This will use session_start() and $_SESSION
  */
- require_once("StreamOnePhpSessionStore.php");
- StreamOneConfig::$session_store = new StreamOnePhpSessionStore();
+Config::$session_store = new PhpSessionStore();
 
 /**
  * @}

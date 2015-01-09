@@ -1,20 +1,21 @@
 <?php
 /**
- * @addtogroup StreamOneSDK The StreamOne SDK
- *
+ * @addtogroup StreamOneSDK
  * @{
  */
 
+namespace StreamOne\API\v3;
+
 /**
- * The base class for StreamOneRequest, abstracting authentication details
+ * The base class for Request, abstracting authentication details
  * 
  * This abstract class provides the basics for doing requests to the StreamOne API, and abstracts
  * the authentication details. This allows for subclasses that just implement a valid
  * authentication scheme, without having to re-implement all the basics of doing requests. For
- * normal use, the StreamOneRequest class provides authentication using users or applications,
- * and StreamOneSessionRequest provides authentication for requests executed within a session.
+ * normal use, the Request class provides authentication using users or applications, and
+ * SessionRequest provides authentication for requests executed within a session.
  */
-abstract class StreamOneRequestBase
+abstract class RequestBase
 {
 	/**
 	 * The API command to call
@@ -94,7 +95,7 @@ abstract class StreamOneRequestBase
 	 *
 	 * @param string $account
 	 *   Hash of the account to use for the request
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccount($account)
@@ -113,7 +114,7 @@ abstract class StreamOneRequestBase
 	 *
 	 * @param array $accounts
 	 *   Array with hashes of the accounts to use for the request
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccounts(array $accounts)
@@ -131,7 +132,7 @@ abstract class StreamOneRequestBase
 	 *
 	 * @param string $customer
 	 *   Hash of the customer to use for the request
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setCustomer($customer)
@@ -149,7 +150,7 @@ abstract class StreamOneRequestBase
 	 *
 	 * @param DateTimeZone $time_zone
 	 *   Timezone to use for the request
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setTimeZone(DateTimeZone $time_zone)
@@ -166,7 +167,7 @@ abstract class StreamOneRequestBase
 	 *   The name of the argument
 	 * @param string $value
 	 *   The new value for the argument; null will be translated to an empty string
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setArgument($argument, $value)
@@ -200,7 +201,7 @@ abstract class StreamOneRequestBase
 	 *
 	 * @param $protocol string
 	 *   The protocol to use
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setProtocol($protocol)
@@ -303,7 +304,7 @@ abstract class StreamOneRequestBase
 	 * This will sign the request, send it to the Internal API server, and analyze the response. To
 	 * check whether the request was successful and returned no error, use the method success().
 	 *
-	 * @retval StreamOneRequest
+	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function execute()

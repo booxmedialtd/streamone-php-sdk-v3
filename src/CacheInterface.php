@@ -4,10 +4,12 @@
  * @{
  */
 
+namespace StreamOne\API\v3;
+
 /**
  * Interface for a key-based cache 
  */
-interface StreamOneCacheInterface
+interface CacheInterface
 {
     /**
      * Get the value of a stored key
@@ -30,7 +32,7 @@ interface StreamOneCacheInterface
      * 
      * Storing a value may not guarantee it being available, so first storing a value and then
      * immediately retrieving it may still not give a valid result. For example, the
-     * StreamOneNoopCache stores nothing so get(...) will never return any value.
+     * NoopCache stores nothing so get(...) will never return any value.
      * 
      * @param string $key Key to cache the value for
      * @param mixed $value Value to store for the given key
