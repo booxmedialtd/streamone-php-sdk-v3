@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Abstract class providing tests for a class implementing StreamOneSessionStoreInterface
+ * Abstract class providing tests for a class implementing SessionStoreInterface
  */
 abstract class SessionStoreInterfaceTest extends PHPUnit_Framework_TestCase
 {

@@ -1,11 +1,11 @@
 <?php
 
-require_once('StreamOneSessionStoreInterfaceTest.php');
+require_once('SessionStoreInterfaceTest.php');
 
 use StreamOne\API\v3\MemorySessionStore;
 
 /**
- * Test the StreamOneMemorySessionStore
+ * Test the MemorySessionStore
  */
 class MemorySessionStoreTest extends SessionStoreInterfaceTest
 {
