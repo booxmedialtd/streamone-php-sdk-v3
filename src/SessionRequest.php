@@ -26,6 +26,8 @@ class SessionRequest extends Request
 	 *   The command to execute
 	 * @param string $action
 	 *   The action to execute
+	 * @param Config $config
+	 *   The configuration object to use for this request
 	 * @param SessionStoreInterface $session_store
 	 *   The session store containing the required session information
 	 * 
@@ -35,14 +37,15 @@ class SessionRequest extends Request
 	 * 
 	 * @see RequestBase::__construct
 	 */
-	public function __construct($command, $action, SessionStoreInterface $session_store)
+	public function __construct($command, $action, Config $config,
+	                            SessionStoreInterface $session_store)
 	{
-		if (!Config::$use_application_auth)
+		if ($config->getAuthenticationType() !== Config::AUTH_APPLICATION)
 		{
 			throw new InvalidArgumentException("Sessions are only supported when application authentication is used");
 		}
 		
-		parent::__construct($command, $action);
+		parent::__construct($command, $action, $config);
 		$this->session_store = $session_store;
 	}
 	

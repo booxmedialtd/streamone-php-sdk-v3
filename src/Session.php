@@ -11,6 +11,9 @@ namespace StreamOne\API\v3;
  */
 class Session
 {
+	/// The configuration object to use for this Session
+	private $config;
+	
 	/// The session store to use for this session
 	private $session_store;
 	
@@ -23,15 +26,19 @@ class Session
 	 * The session object may or may not have an active session, depending on what is stored
 	 * in the passed session store object.
 	 * 
+	 * @param Config $config
+	 *   The configuration object to use for this session
 	 * @param SessionStoreInterface $session_store
-	 *   The session store to use for this session; if not given, use the one defined in
-	 *   Config::$session_store;
+	 *   The session store to use for this session; if not given, use the one defined in the
+	 *   given configuration object
 	 */
-	public function __construct(SessionStoreInterface $session_store = null)
+	public function __construct(Config $config, SessionStoreInterface $session_store = null)
 	{
+		$this->config = $config;
+		
 		if ($session_store === null)
 		{
-			$this->session_store = Config::$session_store;
+			$this->session_store = $config->getSessionStore();
 		}
 		else
 		{
@@ -72,7 +79,7 @@ class Session
 	public function start($username, $password, $ip)
 	{
 		// Initialize session to obtain challenge from API
-		$request = new Request('session', 'initialize');
+		$request = new Request('session', 'initialize', $this->config);
 		$request->setArgument('user', $username);
 		$request->setArgument('userip', $ip);
 		$request->execute();
@@ -92,7 +99,7 @@ class Session
 		$response = Password::generatePasswordResponse($password, $salt, $challenge);
 
 		// Initializing session was OK, try to start it
-		$request = new Request('session', 'create');
+		$request = new Request('session', 'create', $this->config);
 		$request->setArgument('challenge', $challenge);
 		$request->setArgument('response', $response);
 		if ($needs_v2_hash)
@@ -239,7 +246,7 @@ class Session
 			throw new LogicException("No active session");
 		}
 		
-		return new SessionRequest($command, $action, $this->session_store);
+		return new SessionRequest($command, $action, $this->config, $this->session_store);
 	}
 
 	/**

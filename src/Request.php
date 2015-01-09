@@ -1,15 +1,6 @@
 <?php
 /**
- * @addtogroup StreamOneSDK The StreamOne SDK
- * 
- * The StreamOne SDK contains various classes for communication with the StreamOne platform. All
- * classes work with configuration parameters defined in StreamOneConfig.php. To start working
- * with the SDK, copy StreamOneConfig.dist.php to StreamOneConfig.php and adjust the settings
- * where needed.
- * 
- * The central class in the SDK is the StreamOneRequest class, which is used to perform requests
- * to the external API.
- * 
+ * @addtogroup StreamOneSDK
  * @{
  */
 
@@ -25,8 +16,9 @@ namespace StreamOne\API\v3;
  * inspect the retrieved response.
  * 
  * \code
- * use StreamOne\API\v3\Request as StreamOneRequest;
- * $request = new StreamOneRequest('item', 'view');
+ * use StreamOne\API\v3\Plarform as StreamOnePlatform;
+ * $platform = new StreamOnePlatform(array(...));
+ * $request = $platform->newRequest('item', 'view');
  * $request->setAccount('Mn9mdVb-02mA')
  *         ->setArgument('item', 'vMD_9k1SmkS5')
  *         ->execute();
@@ -46,6 +38,9 @@ namespace StreamOne\API\v3;
  */
 class Request extends RequestBase
 {
+	/// The Config object with information for this request
+	private $config;
+	
 	/**
 	 * Whether the response was retrieved from the cache
 	 */
@@ -58,19 +53,39 @@ class Request extends RequestBase
 
 	/**
 	 * @see RequestBase::__construct
+	 * 
+	 * @param string $command
+	 *   The API command to call
+	 * @param string $action
+	 *   The action to perform on the API command
+	 * @param Config $config
+	 *   The Config object to use for this request
+	 * 
+	 * @throw UnexpectedValueException
+	 *   The given Config object is not valid for performing requests
 	 */
-	public function __construct($command, $action)
+	public function __construct($command, $action, Config $config)
 	{
 		parent::__construct($command, $action);
 		
-		// Check whether to use application authentication
-		if (Config::$use_application_auth)
+		$this->config = $config;
+		
+		// Validate configuration
+		if (!$config->validateForRequests())
 		{
-			$this->parameters['authentication_type'] = 'application';
+			throw new \UnexpectedValueException('Invalid Config object');
 		}
-		else // user authentication
+		
+		// Set correct authentication_type parameter
+		switch ($this->config->getAuthenticationType())
 		{
-			$this->parameters['authentication_type'] = 'user';
+			case Config::AUTH_USER:
+				$this->parameters['authentication_type'] = 'user';
+				break;
+			
+			case Config::AUTH_APPLICATION:
+				$this->parameters['authentication_type'] = 'application';
+				break;
 		}
 	}
 
@@ -141,7 +156,7 @@ class Request extends RequestBase
 	 */
 	protected function apiUrl()
 	{
-		return Config::$api_url;
+		return $this->config->getApiUrl();
 	}
 
 	/**
@@ -151,16 +166,8 @@ class Request extends RequestBase
 	 */
 	protected function signingKey()
 	{
-		if (Config::$use_application_auth)
-		{
-			// Application authentication: return the application pre-shared key
-			return Config::$application_key;
-		}
-		else
-		{
-			// User authentication: return the user pre-shared key.
-			return Config::$user_key;
-		}
+		// Config object returns correct key for authentication type in use
+		return $this->config->getAuthenticationActorKey();
 	}
 
 	/**
@@ -172,22 +179,26 @@ class Request extends RequestBase
 	{
 		$parameters = parent::parametersForSigning();
 		
-		if (Config::$use_application_auth)
+		// Set actor ID parameter
+		$actor_id = $this->config->getAuthenticationActorId();
+		switch ($this->config->getAuthenticationType())
 		{
-			$parameters['application'] = Config::$application;
+			case Config::AUTH_USER:
+				$parameters['user'] = $actor_id;
+				break;
+			
+			case Config::AUTH_APPLICATION:
+				$parameters['application'] = $actor_id;
+				break;
 		}
-		else
-		{
-			$parameters['user'] = Config::$user;
-		}
-
+		
 		// Check if a default account is specified, and it is not overridden for this request
 		if (!isset($parameters['account']) && !isset($parameters['customer']) &&
-		    isset(Config::$default_account))
+		    $this->config->hasDefaultAccountId())
 		{
-			$parameters['account'] = Config::$default_account;
+			$parameters['account'] = $this->config->getDefaultAccountId();
 		}
-
+		
 		return $parameters;
 	}
 	
@@ -195,7 +206,7 @@ class Request extends RequestBase
 	 * Handle a plain-text response as received from the API
 	 * 
 	 * If the request was valid and contains one of the status codes set in
-	 * Config::$visible_errors, a very noticable error message will be shown on the
+	 * Config::getVisibleErrors, a very noticable error message will be shown on the
 	 * screen. It is advisable that these errors are handled and logged in a less visible manner,
 	 * and that the visible_errors configuration variable is then set to an empty array. This is
 	 * not done by default to aid in catching these errors during development.
@@ -210,7 +221,7 @@ class Request extends RequestBase
 		parent::handleResponse($response);
 
 		// Check if the response was valid and the status code is one of the visible errors
-		if ($this->valid() && in_array($this->status(), Config::$visible_errors))
+		if ($this->valid() && $this->config->isVisibleError($this->status()))
 		{
 			echo '<div style="position:absolute;top:0;left:0;right:0;background-color:black;color:red;font-weight:bold;padding:5px 10px;border:3px outset #d00;z-index:2147483647;font-size:12pt;font-family:sans-serif;">StreamOne API error ' . $this->status() . ': <em>' . $this->statusMessage() . '</em></div>';
 		}
@@ -256,12 +267,17 @@ class Request extends RequestBase
 	 */
 	protected function retrieveCache()
 	{
-		$response = Config::$cache->get($this->cacheKey());
+		// Retrieve cache object from config
+		$cache = $this->config->getCache();
+		
+		// Check for response from cache
+		$response = $cache->get($this->cacheKey());
 		
 		if ($response !== false)
 		{
+			// Object found; store meta-data and return it
 			$this->from_cache = true;
-			$this->cache_age = Config::$cache->age($this->cacheKey());
+			$this->cache_age = $cache->age($this->cacheKey());
 			return $response;
 		}
 		
@@ -279,7 +295,8 @@ class Request extends RequestBase
 	{
 		if ($this->cacheable() && !$this->from_cache)
 		{
-			Config::$cache->set($this->cacheKey(), $this->plainResponse());
+			$cache = $this->config->getCache();
+			$cache->set($this->cacheKey(), $this->plainResponse());
 		}
 	}
 }
