@@ -153,7 +153,7 @@ abstract class RequestBase
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
-	public function setTimeZone(DateTimeZone $time_zone)
+	public function setTimeZone(\DateTimeZone $time_zone)
 	{
 		$this->parameters['timezone'] = $time_zone->getName();
 
@@ -535,7 +535,7 @@ abstract class RequestBase
 	protected function signedParameters()
 	{
 		$parameters = $this->parametersForSigning();
-		$parameters['signature'] = $this->signParameters();
+		$parameters['signature'] = $this->signature();
 
 		return $parameters;
 	}
@@ -546,7 +546,7 @@ abstract class RequestBase
 	 * @retval String
 	 *   The signature for the current request
 	 */
-	protected function signParameters()
+	protected function signature()
 	{
 		$parameters = $this->parametersForSigning();
 		$path = $this->path();
