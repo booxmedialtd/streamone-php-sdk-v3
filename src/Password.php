@@ -1,11 +1,12 @@
 <?php
 /**
- * @addtogroup StreamOneSDK The StreamOne SDK
- *
+ * @addtogroup StreamOneSDK
  * @{
  */
 
-class StreamOnePassword
+namespace StreamOne\API\v3;
+
+class Password
 {
 	/**
 	 * Generate a password response for a given password, salt and challenge from the server

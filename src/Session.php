@@ -1,19 +1,19 @@
 <?php
 /**
- * @addtogroup StreamOneSDK The StreamOne SDK
- *
+ * @addtogroup StreamOneSDK
  * @{
  */
 
-require_once('StreamOneRequest.php');
-require_once('StreamOneSessionRequest.php');
-require_once('StreamOnePassword.php');
+namespace StreamOne\API\v3;
 
 /**
  * Manage a session for use with the StreamOne platform
  */
-class StreamOneSession
+class Session
 {
+	/// The configuration object to use for this Session
+	private $config;
+	
 	/// The session store to use for this session
 	private $session_store;
 	
@@ -26,15 +26,19 @@ class StreamOneSession
 	 * The session object may or may not have an active session, depending on what is stored
 	 * in the passed session store object.
 	 * 
-	 * @param StreamOneSessionStoreInterface $session_store
-	 *   The session store to use for this session; if not given, use the one defined in
-	 *   StreamOneConfig::$session_store;
+	 * @param Config $config
+	 *   The configuration object to use for this session
+	 * @param SessionStoreInterface $session_store
+	 *   The session store to use for this session; if not given, use the one defined in the
+	 *   given configuration object
 	 */
-	public function __construct(StreamOneSessionStoreInterface $session_store = null)
+	public function __construct(Config $config, SessionStoreInterface $session_store = null)
 	{
+		$this->config = $config;
+		
 		if ($session_store === null)
 		{
-			$this->session_store = StreamOneConfig::$session_store;
+			$this->session_store = $config->getSessionStore();
 		}
 		else
 		{
@@ -75,7 +79,7 @@ class StreamOneSession
 	public function start($username, $password, $ip)
 	{
 		// Initialize session to obtain challenge from API
-		$request = new StreamOneRequest('session', 'initialize');
+		$request = new Request('session', 'initialize', $this->config);
 		$request->setArgument('user', $username);
 		$request->setArgument('userip', $ip);
 		$request->execute();
@@ -92,15 +96,15 @@ class StreamOneSession
 		$salt = $request_body['salt'];
 		$challenge = $request_body['challenge'];
 		
-		$response = StreamOnePassword::generatePasswordResponse($password, $salt, $challenge);
+		$response = Password::generatePasswordResponse($password, $salt, $challenge);
 
 		// Initializing session was OK, try to start it
-		$request = new StreamOneRequest('session', 'create');
+		$request = new Request('session', 'create', $this->config);
 		$request->setArgument('challenge', $challenge);
 		$request->setArgument('response', $response);
 		if ($needs_v2_hash)
 		{
-			$vs_hash = StreamOnePassword::generateV2PasswordHash($password);
+			$vs_hash = Password::generateV2PasswordHash($password);
 			$request->setArgument('v2hash', $v2_hash);
 		}
 		$request->execute();
@@ -123,10 +127,10 @@ class StreamOneSession
 	/**
 	 * Save the request used in start() for later inspection by startStatus/startStatusMessage
 	 * 
-	 * @param StreamOneRequest $request
+	 * @param Request $request
 	 *   The request to save for later inspection
 	 */
-	protected function saveStartRequest(StreamOneRequest $request)
+	protected function saveStartRequest(Request $request)
 	{
 		$this->start_request = $request;
 	}
@@ -229,7 +233,7 @@ class StreamOneSession
 	 *   The command for the new request
 	 * @param string $action
 	 *   The action for the new request
-	 * @retval StreamOneSessionRequest
+	 * @retval SessionRequest
 	 *   The new request using the currently active session for authentication
 	 * 
 	 * @throws LogicException
@@ -242,7 +246,7 @@ class StreamOneSession
 			throw new LogicException("No active session");
 		}
 		
-		return new StreamOneSessionRequest($command, $action, $this->session_store);
+		return new SessionRequest($command, $action, $this->config, $this->session_store);
 	}
 
 	/**

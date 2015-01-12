@@ -4,10 +4,12 @@
  * @{
  */
 
+namespace StreamOne\API\v3;
+
 /**
  * Interface for a key-based cache 
  */
-interface StreamOneCacheInterface
+interface CacheInterface
 {
     /**
      * Get the value of a stored key
@@ -18,10 +20,10 @@ interface StreamOneCacheInterface
     public function get($key);
 
     /**
-     * Get the age of a stored key
+     * Get the age of a stored key in seconds
      *
      * @param string $key Key to get the age of
-     * @return mixed Age of the key, or false if value not found or expired
+     * @return mixed Age of the key in seconds, or false if value not found or expired
      */
     public function age($key);
     
@@ -30,7 +32,7 @@ interface StreamOneCacheInterface
      * 
      * Storing a value may not guarantee it being available, so first storing a value and then
      * immediately retrieving it may still not give a valid result. For example, the
-     * StreamOneNoopCache stores nothing so get(...) will never return any value.
+     * NoopCache stores nothing so get(...) will never return any value.
      * 
      * @param string $key Key to cache the value for
      * @param mixed $value Value to store for the given key

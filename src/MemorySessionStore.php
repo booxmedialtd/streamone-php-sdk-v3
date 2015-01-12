@@ -4,7 +4,7 @@
  * @{
  */
 
-require_once('StreamOneSessionStoreInterface.php');
+namespace StreamOne\API\v3;
 
 /**
  * In-memory session storage class
@@ -12,7 +12,7 @@ require_once('StreamOneSessionStoreInterface.php');
  * Values in instances of  session store are only known for the lifetime of the instance, and
  * will be discarded once the instance is destroyed.
  */
-class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
+class MemorySessionStore implements SessionStoreInterface
 {
 	/// The current session ID; null if no active session
 	private $id = null;
@@ -24,7 +24,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	private $user_id = null;
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::hasSession()
+	 * @copydoc SessionStoreInterface::hasSession()
 	 */
 	public function hasSession()
 	{
@@ -47,7 +47,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::clearSession()
+	 * @copydoc SessionStoreInterface::clearSession()
 	 */
 	public function clearSession()
 	{
@@ -58,7 +58,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::setSession()
+	 * @copydoc SessionStoreInterface::setSession()
 	 */
 	public function setSession($id, $key, $user_id, $timeout)
 	{
@@ -69,7 +69,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::setTimeout()
+	 * @copydoc SessionStoreInterface::setTimeout()
 	 */
 	public function setTimeout($timeout)
 	{
@@ -77,7 +77,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getId()
+	 * @copydoc SessionStoreInterface::getId()
 	 */
 	public function getId()
 	{
@@ -85,7 +85,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getKey()
+	 * @copydoc SessionStoreInterface::getKey()
 	 */
 	public function getKey()
 	{
@@ -93,7 +93,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getUserId()
+	 * @copydoc SessionStoreInterface::getUserId()
 	 */
 	public function getUserId()
 	{
@@ -101,7 +101,7 @@ class StreamOneMemorySessionStore implements StreamOneSessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc StreamOneSessionStoreInterface::getTimeout()
+	 * @copydoc SessionStoreInterface::getTimeout()
 	 */
 	public function getTimeout()
 	{
