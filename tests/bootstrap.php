@@ -1,5 +1,9 @@
 <?php
 
+// We start a session here, to be sure that no output has been sent yet.
+// We need this for tests that use PHP sessions.
+session_start();
+
 // Autoloader for source files
 spl_autoload_register(function($class)
 {
