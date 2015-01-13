@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 // Autoloader for source files
 spl_autoload_register(function($class)
 {
