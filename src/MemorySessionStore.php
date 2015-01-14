@@ -22,6 +22,8 @@ class MemorySessionStore implements SessionStoreInterface
 	private $timeout = null;
 	/// The user ID of the user logged in with the current session; null if no active session
 	private $user_id = null;
+	/// Data store for cached values
+	private $cache = array();
 	
 	/**
 	 * @copydoc SessionStoreInterface::hasSession()
@@ -55,6 +57,7 @@ class MemorySessionStore implements SessionStoreInterface
 		$this->key = null;
 		$this->timeout = null;
 		$this->user_id = null;
+		$this->cache = array();
 	}
 
 	/**
@@ -107,6 +110,38 @@ class MemorySessionStore implements SessionStoreInterface
 	{
 		// Return difference between timeout moment and now
 		return $this->timeout - time();
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::hasCacheKey()
+	 */
+	public function hasCacheKey($key)
+	{
+		return array_key_exists($key, $this->cache);
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::getCacheKey()
+	 */
+	public function getCacheKey($key)
+	{
+		return $this->cache[$key];
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::setCacheKey()
+	 */
+	public function setCacheKey($key, $value)
+	{
+		$this->cache[$key] = $value;
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::unsetCacheKey()
+	 */
+	public function unsetCacheKey($key)
+	{
+		unset($this->cache[$key]);
 	}
 }
 
