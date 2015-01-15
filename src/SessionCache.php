@@ -32,7 +32,7 @@ class SessionCache implements CacheInterface
 	 *   session store used in that session is used for caching. If a session store is passed,
 	 *   that session store is used.
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   The given $session was neither a Session nor a SessionStoreInterface
 	 */
 	public function __construct($session)

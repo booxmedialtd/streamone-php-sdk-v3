@@ -158,14 +158,14 @@ class Session
 	 *   The status of the last request of the last call to start(), or null if the
 	 *   reponse was invalid
 	 * 
-	 * @throw LogicException
+	 * @throw \LogicException
 	 *   The start() method has not been called on this instance
 	 */
 	public function startStatus()
 	{
 		if ($this->start_request === null)
 		{
-			throw new LogicException('The start() method has not been called on this instance');
+			throw new \LogicException('The start() method has not been called on this instance');
 		}
 		
 		if (!$this->start_request->valid())
@@ -189,14 +189,14 @@ class Session
 	 *   The status message of the last request of the last call to start(), or null if the
 	 *   reponse was invalid
 	 * 
-	 * @throw LogicException
+	 * @throw \LogicException
 	 *   The start() method has not been called on this instance
 	 */
 	public function startStatusMessage()
 	{
 		if ($this->start_request === null)
 		{
-			throw new LogicException('The start() method has not been called on this instance');
+			throw new \LogicException('The start() method has not been called on this instance');
 		}
 		
 		if (!$this->start_request->valid())
@@ -212,7 +212,7 @@ class Session
 	 * 
 	 * This method should only be called with an active session.
 	 * 
-	 * @throw LogicException
+	 * @throw \LogicException
 	 *   There is currently no active session
 	 * 
 	 * @retval bool
@@ -224,7 +224,7 @@ class Session
 	{
 		if (!$this->isActive())
 		{
-			throw new LogicException("No active session");
+			throw new \LogicException("No active session");
 		}
 
 		$request = $this->newRequest('session', 'delete');
@@ -247,14 +247,14 @@ class Session
 	 * @retval SessionRequest
 	 *   The new request using the currently active session for authentication
 	 * 
-	 * @throws LogicException
+	 * @throws \LogicException
 	 *   When no session is active
 	 */
 	public function newRequest($command, $action)
 	{
 		if (!$this->isActive())
 		{
-			throw new LogicException("No active session");
+			throw new \LogicException("No active session");
 		}
 		
 		return new SessionRequest($command, $action, $this->config, $this->session_store);
@@ -268,7 +268,7 @@ class Session
 	 * @retval string
 	 *   The ID of the user currently logged in with this session
 	 * 
-	 * @throw LogicException
+	 * @throw \LogicException
 	 *   There is no currently active session
 	 */
 
@@ -276,7 +276,7 @@ class Session
 	{
 		if (!$this->isActive())
 		{
-			throw new LogicException("No active session");
+			throw new \LogicException("No active session");
 		}
 		
 		return $this->session_store->getUserId();

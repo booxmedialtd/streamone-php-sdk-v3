@@ -37,7 +37,7 @@ class Platform
 	 *   A key=>value array of configuration options. See the documentation of the Config
 	 *   class for the available configuration options.
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   For the same reasons as Config::__construct().
 	 */
 	public function __construct(array $configuration)

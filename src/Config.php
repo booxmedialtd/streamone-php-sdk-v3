@@ -83,11 +83,11 @@ class Config
 	 * @param array $options
 	 *   A key=>value array of options to use
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   An authentication type is provided, but the necessary fields for that authentication type
 	 *   are not provided. For user authentication, user_id and user_psk must be provided. For
 	 *   application authentication, application_id and application_psk must be provided.
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   The provided cache or session_store was either an incorrect class, or not an array with
 	 *   the correct options for the corresponding factory method.
 	 */
@@ -201,7 +201,7 @@ class Config
 	 * @retval ReflectionClass
 	 *   A ReflectionClass instance for the given class name
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   The given class name does not resolve to a valid class
 	 */
 	protected function resolveReflectionClass($name)
@@ -235,7 +235,7 @@ class Config
 	 * @retval CacheInterface
 	 *   The constructed cache
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   There is no class named $name, it does not implement CacheInterface, or the passed
 	 *   constructor arguments are invalid.
 	 */
@@ -269,7 +269,7 @@ class Config
 	 * @retval SessionStoreInterface
 	 *   The constructed session store
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   There is no class named $name, it does not implement SessionStoreInterface, or the passed
 	 *   constructor arguments are invalid.
 	 */
