@@ -39,6 +39,37 @@ class PHPUnit_TestCase extends PHPUnit_Framework_TestCase
 		
 		self::assertThat($array, $constraint, $message);
 	}
+
+	/**
+	 * Assert that an array does not have a specified key
+	 *
+	 * @param integer|string $key
+	 *   Key to check
+	 * @param array $array
+	 *   Array which must not have the given key
+	 * @param string $message
+	 *   Optional message
+	 */
+	public static function assertArrayKeyDoesNotExist($key, $array, $message = '')
+	{
+		if (!(is_integer($key) || is_string($key)))
+		{
+			throw PHPUnit_Util_InvalidArgumentHelper::factory(
+				1, 'integer or string'
+			);
+		}
+
+		if (!(is_array($array) || ($array instanceof ArrayAccess)))
+		{
+			throw PHPUnit_Util_InvalidArgumentHelper::factory(
+				3, 'array or ArrayAccess'
+			);
+		}
+
+		$constraint = new PHPUnit_Constraint_ArrayKeyDoesNotExist($key);
+
+		self::assertThat($array, $constraint, $message);
+	}
 	
 	/**
 	 * Assert than an array is the same as a different array, excluding element ordering
