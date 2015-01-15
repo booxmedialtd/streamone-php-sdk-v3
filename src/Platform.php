@@ -98,7 +98,7 @@ class Platform
 	 * @retval Actor
 	 *   The created actor object
 	 */
-	public function newActor($session)
+	public function newActor(Session $session = null)
 	{
 		return new Actor($this->config, $session);
 	}

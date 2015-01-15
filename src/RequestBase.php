@@ -94,7 +94,7 @@ abstract class RequestBase
 	 * action you are executing to read whether providing an account is required or not.
 	 *
 	 * @param string|null $account
-	 *   Hash of the account to use for the request; if null, clear account
+	 *   ID of the account to use for the request; if null, clear account
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -124,14 +124,15 @@ abstract class RequestBase
 	 * If an account is not set, return null
 	 *
 	 * @return string|null
-	 *   The hash of the account to use for the request or null if no account is set
+	 *   The ID of the account to use for the request or null if no account is set. If more than
+	 *   one account has been set (with setAccounts), the first one will be returned
 	 */
 	public function getAccount()
 	{
 		if (isset($this->parameters['account']))
 		{
 			$accounts = explode(',', $this->parameters['account']);
-			if (count($accounts) == 1)
+			if (!empty($accounts))
 			{
 				return $accounts[0];
 			}
@@ -148,7 +149,7 @@ abstract class RequestBase
 	 * account is allowed or not.
 	 *
 	 * @param array $accounts
-	 *   Array with hashes of the accounts to use for the request; if empty, clear accounts
+	 *   Array with IDs of the accounts to use for the request; if empty, clear accounts
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -178,7 +179,7 @@ abstract class RequestBase
 	 * If an accounts are set, return an empty array
 	 *
 	 * @return array()
-	 *   An array with the hashes of the accounts to use for the request
+	 *   An array with the IDs of the accounts to use for the request
 	 */
 	public function getAccounts()
 	{
@@ -197,7 +198,7 @@ abstract class RequestBase
 	 * Refer to the documentation to check whether it is needed
 	 *
 	 * @param string|null $customer
-	 *   Hash of the customer to use for the request; if null clear customer
+	 *   ID of the customer to use for the request; if null clear customer
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -227,7 +228,7 @@ abstract class RequestBase
 	 * If an customer is not set, return null
 	 *
 	 * @return string|null
-	 *   The hash of the customer to use for the request or null if no customer is set
+	 *   The ID of the customer to use for the request or null if no customer is set
 	 */
 	public function getCustomer()
 	{

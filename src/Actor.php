@@ -17,7 +17,7 @@ class Actor
 	/// The configuration object to use for this Actor
 	private $config;
 
-	/// The session object to use for this Actor
+	/// The session object to use for this Actor; null if not using a session
 	private $session;
 
 	/// The customer to use for this Actor
@@ -35,7 +35,7 @@ class Actor
 	 *   The session object to use for this actor; if null, it will use authentication information
 	 *   from the configuration
 	 */
-	public function __construct(Config $config, $session = null)
+	public function __construct(Config $config, Session $session = null)
 	{
 		$this->config = $config;
 		$this->session = $session;
@@ -47,10 +47,32 @@ class Actor
 	}
 
 	/**
+	 * Get the config for this actor
+	 * 
+	 * @retval Config
+	 *   The config used for this actor
+	 */
+	public function getConfig()
+	{
+		return $this->config;
+	}
+
+	/**
+	 * Get the session used for this actor
+	 * 
+	 * @retval Session|null
+	 *   The session used for this actor; null if not using a session
+	 */
+	public function getSession()
+	{
+		return $this->session;
+	}
+
+	/**
 	 * Set the account to use for this actor
 	 *
 	 * @param string|null $account
-	 *   Hash of the account to use for this actor; if null, clear account. Note that calling this
+	 *   ID of the account to use for this actor; if null, clear account. Note that calling this
 	 *   function will clear the customer, as it is not possible to have both at the same time
 	 */
 	public function setAccount($account)
@@ -70,7 +92,8 @@ class Actor
 	 * Get the account used for this actor
 	 *
 	 * @retval string|null
-	 *   Hash of the account used for this actor; null if none
+	 *   ID of the account used for this actor; null if none. If more than one account has been set
+	 *   (with setAccounts), the first one will be returned
 	 */
 	public function getAccount()
 	{
@@ -85,7 +108,7 @@ class Actor
 	 * Set the accounts to use for this actor
 	 *
 	 * @param array $accounts
-	 *   Array with hashes of the accounts to use for this actor. Note that calling this
+	 *   Array with IDs of the accounts to use for this actor. Note that calling this
 	 *   function will clear the customer, as it is not possible to have both at the same time
 	 */
 	public function setAccounts(array $accounts)
@@ -98,7 +121,7 @@ class Actor
 	 * Get the accounts used for this actor
 	 *
 	 * @retval array
-	 *   The hashes of the accounts used for this actor; empty array if none
+	 *   The IDs of the accounts used for this actor; empty array if none
 	 */
 	public function getAccounts()
 	{
@@ -109,7 +132,7 @@ class Actor
 	 * Set the customer to use for this actor
 	 *
 	 * @param string|null $customer
-	 *   Hash of the customer to use for this actor; if null, clear customer. Note that calling this
+	 *   ID of the customer to use for this actor; if null, clear customer. Note that calling this
 	 *   function will clear the account(s), as it is not possible to have both at the same time
 	 */
 	public function setCustomer($customer)
@@ -122,7 +145,7 @@ class Actor
 	 * Get the customer used for this actor
 	 *
 	 * @retval string|null
-	 *   The hash of the customer used for this actor; null if none
+	 *   The ID of the customer used for this actor; null if none
 	 */
 	public function getCustomer()
 	{
@@ -139,10 +162,13 @@ class Actor
 	 *
 	 * @retval Request
 	 *   A request to the given command and action for the given actor
+	 *
+	 * @throws \LogicException
+	 *   When a session is used for this actor and that session is not active
 	 */
 	public function newRequest($command, $action)
 	{
-		if ($this->session !== null && $this->session->isActive())
+		if ($this->session !== null)
 		{
 			$request = $this->session->newRequest($command, $action);
 		}
@@ -161,6 +187,7 @@ class Actor
 		}
 		else
 		{
+			// This call is done to overwrite the default account for the config, if it is set
 			$request->setAccount(null);
 		}
 

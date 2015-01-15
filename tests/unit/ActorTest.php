@@ -88,6 +88,7 @@ class TestActorRequest extends Request
 		return $this->request->signingKey();
 	}
 }
+
 /**
  * Test for the Actor class
  */
@@ -142,318 +143,631 @@ class ActorTest extends PHPUnit_TestCase
 	}
 
 	/**
-	 * Test if setting an account has the intended behaviour
+	 * Test the config-option of the constructor
+	 */
+	public function testConstructorConfig()
+	{
+		$actor = new Actor(self::$configs['user']);
+		
+		$this->assertSame(self::$configs['user'], $actor->getConfig());
+	}
+	
+	/**
+	 * Test the session-option of the constructor
 	 *
-	 * @param string $config
-	 *   The configuration to use
-	 * @param bool $use_session
-	 *   True if and only if a session should be used
-	 * @param bool $set_account
-	 *   True if and only if the account should be set
+	 * @param string|null $session
+	 *   Name of the session (from self::$sessions) to use
+	 *
+	 * @dataProvider provideConstructorSession
+	 */
+	public function testConstructorSession($session)
+	{
+		$session_to_use = null;
+		if ($session !== null)
+		{
+			$session_to_use = self::$sessions[$session];
+		}
+		$actor = new Actor(self::$configs['user'], $session_to_use);
+		
+		$this->assertSame($session_to_use, $actor->getSession());
+	}
+	
+	public function provideConstructorSession()
+	{
+		return array(
+			array(null),
+			array('application'),
+		);
+	}
+	
+	/**
+	 * Test that the constructor sets the default account
+	 *
+	 * @param string|null $config
+	 *   Name of the config (from self::$config) to use
+	 *
+	 * @dataProvider provideConstructorDefaultAccount
+	 */
+	public function testConstructorDefaultAccount($config)
+	{
+		/** @var Config $my_config */
+		$my_config = self::$configs[$config];
+		$actor = new Actor($my_config);
+		
+		$this->assertSame($my_config->getDefaultAccountId(), $actor->getAccount());
+	}
+	
+	public function provideConstructorDefaultAccount()
+	{
+		return array(
+			array('user'),
+			array('user_default_account'),
+		);
+	}
+	
+	/**
+	 * Test that setting the account of an actor works as expected
+	 *
 	 * @param string|null $account
-	 *   The account to set / test
-	 * @param bool $should_be_default_account
-	 *   True if and only if the default account should be returned instead of the set one
+	 *   The ID of the account to set; null to clear the account
 	 *
 	 * @dataProvider provideSetAccount
 	 */
-	public function testSetAccount($config, $use_session, $set_account, $account,
-	                               $should_be_default_account = false)
+	public function testSetAccount($account)
 	{
-		/** @var Session $session_to_use */
-		$session_to_use = null;
-		if ($use_session)
+		$actor = new Actor(self::$configs['user']);
+		$actor->setAccount($account);
+		
+		$this->assertSame($account, $actor->getAccount());
+		if ($account == null)
 		{
-			$session_to_use = self::$sessions[$config];
-		}
-		$actor = new Actor(self::$configs[$config], $session_to_use);
-
-		/** @var Config $config_to_use */
-		$config_to_use = self::$configs[$config];
-
-		if ($set_account)
-		{
-			$actor->setAccount($account);
-		}
-
-		if ($should_be_default_account)
-		{
-			$this->assertEquals($config_to_use->getDefaultAccountId(), $actor->getAccount());
+			$this->assertEmpty($actor->getAccounts());
 		}
 		else
 		{
-			$this->assertEquals($account, $actor->getAccount());
+			$this->assertSame(array($account), $actor->getAccounts());
 		}
 		$this->assertNull($actor->getCustomer());
-		
-		$request = $actor->newRequest('command', 'action');
-		if ($use_session)
-		{
-			$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
-			$request = new TestActorRequest($request);
-		}
-		else
-		{
-			$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
-			$request = new TestActorRequest($request);
-		}
-
-		if ($should_be_default_account)
-		{
-			$this->assertEquals($config_to_use->getDefaultAccountId(), $request->getAccount());
-		}
-		else
-		{
-			$this->assertEquals($account, $request->getAccount());
-			if ($account === null)
-			{
-				$this->assertArrayNotHasKey('account', $request->parametersForSigning());
-			}
-		}
-		
-		$this->assertEquals($config_to_use->getAuthenticationType(), 
-		                    $request->getAuthenticationType());
-		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(), 
-		                               $config_to_use->getAuthenticationActorId(), 
-		                               $request->parametersForSigning());
-		if ($use_session)
-		{
-			$session_id = $session_to_use->getSessionStore()->getId();
-			$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
-			$session_key = $session_to_use->getSessionStore()->getKey();
-			$this->assertEquals($config_to_use->getAuthenticationActorKey() . $session_key, $request->signingKey());
-		}
-		else
-		{
-			$this->assertEquals($config_to_use->getAuthenticationActorKey(), $request->signingKey());
-		}
-
-		$this->assertNull($request->getCustomer());
-		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
-
+	
 	public function provideSetAccount()
 	{
 		return array(
-			array('user', false, true, 'account123'),
-			array('user_default_account', false, true, 'account123'),
-			array('application', false, true, 'account123'),
-			array('application_default_account', false, true, 'account123'),
-			array('user', false, true, null),
-			array('user_default_account', false, true, null),
-			array('application', false, true, null),
-			array('application_default_account', false, true, null),
-			array('user', false, true, 'A'),
-			array('user', false, false, null, true),
-			array('user_default_account', false, false, null, true),
-			array('application', false, false, null, true),
-			array('application_default_account', false, false, null, true),
-			array('application', true, true, 'account123'),
-			array('application_default_account', true, true, 'account123'),
+			array('account123'),
+			array(null)
 		);
 	}
-
+	
 	/**
-	 * Test if setting multiple accounts has the intended behaviour
+	 * Test that setting the accounts of an actor works as expected
 	 *
-	 * @param string $config
-	 *   The configuration to use
-	 * @param bool $use_session
-	 *   True if and only if a session should be used
-	 * @param bool $set_accounts
-	 *   True if and only if the accounts should be set
 	 * @param array $accounts
-	 *   The accounts to set / test
-	 * @param bool $should_be_default_account
-	 *   True if and only if the default account should be returned instead of the set ones
+	 *   An arraw with the IDs of the accounts to set
 	 *
 	 * @dataProvider provideSetAccounts
 	 */
-	public function testSetAccounts($config, $use_session, $set_accounts, $accounts,
-	                                $should_be_default_account = false)
+	public function testSetAccounts($accounts)
 	{
-		/** @var Session $session_to_use */
-		$session_to_use = null;
-		if ($use_session)
+		$actor = new Actor(self::$configs['user']);
+		$actor->setAccounts($accounts);
+		
+		$this->assertSame($accounts, $actor->getAccounts());
+		if (empty($accounts))
 		{
-			$session_to_use = self::$sessions[$config];
-		}
-		$actor = new Actor(self::$configs[$config], $session_to_use);
-
-		/** @var Config $config_to_use */
-		$config_to_use = self::$configs[$config];
-
-		if ($set_accounts)
-		{
-			$actor->setAccounts($accounts);
-		}
-
-		if ($should_be_default_account)
-		{
-			if ($config_to_use->getDefaultAccountId() === null)
-			{
-				$this->assertEmpty($actor->getAccounts());
-			}
-			else
-			{
-				$this->assertEquals(array($config_to_use->getDefaultAccountId()), $actor->getAccounts());
-			}
+			$this->assertNull($actor->getAccount());
 		}
 		else
 		{
-			$this->assertEquals($accounts, $actor->getAccounts());
+			$this->assertSame($accounts[0], $actor->getAccount());
 		}
 		$this->assertNull($actor->getCustomer());
-
-		$request = $actor->newRequest('command', 'action');
-		if ($use_session)
-		{
-			$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
-			$request = new TestActorRequest($request);
-		}
-		else
-		{
-			$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
-			$request = new TestActorRequest($request);
-		}
-
-		if ($should_be_default_account)
-		{
-			if ($config_to_use->getDefaultAccountId() === null)
-			{
-				$this->assertEmpty($request->getAccounts());
-			}
-			else
-			{
-				$this->assertEquals(array($config_to_use->getDefaultAccountId()), $request->getAccounts());
-			}
-		}
-		else
-		{
-			$this->assertEquals($accounts, $request->getAccounts());
-		}
-
-		$this->assertEquals($config_to_use->getAuthenticationType(),
-		                    $request->getAuthenticationType());
-		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
-		                               $config_to_use->getAuthenticationActorId(),
-		                               $request->parametersForSigning());
-		if ($use_session)
-		{
-			$session_id = $session_to_use->getSessionStore()->getId();
-			$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
-			$session_key = $session_to_use->getSessionStore()->getKey();
-			$this->assertEquals($config_to_use->getAuthenticationActorKey() . $session_key, $request->signingKey());
-		}
-		else
-		{
-			$this->assertEquals($config_to_use->getAuthenticationActorKey(), $request->signingKey());
-		}
-
-		$this->assertNull($request->getCustomer());
-		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
-
+	
 	public function provideSetAccounts()
 	{
 		return array(
-			array('user', false, true, array('account123')),
-			array('user_default_account', false, true, array('account123')),
-			array('application', false, true, array('account123')),
-			array('application_default_account', false, true, array('account123')),
-			array('user', false, true, array()),
-			array('user_default_account', false, true, array()),
-			array('application', false, true, array()),
-			array('application_default_account', false, true, array()),
-			array('user', false, true, array('A', 'B', 'C', 'D')),
-			array('user', false, false, null, true),
-			array('user_default_account', false, false, null, true),
-			array('application', false, false, null, true),
-			array('application_default_account', false, false, null, true),
-			array('application', true, true, array('account123', 'abc')),
-			array('application_default_account', true, true, array('account123', 'abc')),
+			array(array('account123')),
+			array(array('account123', 'anotheraccount')),
+			array(array())
 		);
 	}
-
+	
 	/**
-	 * Test if setting a customer has the intended behaviour
+	 * Test that setting the customer of an actor works as expected
 	 *
-	 * @param string $config
-	 *   The configuration to use
-	 * @param bool $use_session
-	 *   True if and only if a session should be used
 	 * @param string|null $customer
-	 *   The customer to set / test
+	 *   The ID of the customer to set; null to clear the account
 	 *
 	 * @dataProvider provideSetCustomer
 	 */
-	public function testSetCustomer($config, $use_session, $customer)
+	public function testSetCustomer($customer)
 	{
-		/** @var Session $session_to_use */
-		$session_to_use = null;
-		if ($use_session)
-		{
-			$session_to_use = self::$sessions[$config];
-		}
-		$actor = new Actor(self::$configs[$config], $session_to_use);
-
+		$actor = new Actor(self::$configs['user']);
+		$actor->setCustomer($customer);
+		
+		$this->assertSame($customer, $actor->getCustomer());
+		$this->assertNull($actor->getAccount());
+		$this->assertEmpty($actor->getAccounts());
+	}
+	
+	public function provideSetCustomer()
+	{
+		return array(
+			array('customer123'),
+			array(null)
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with an account has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param string|null $account
+	 *   The account to set / test
+	 *
+	 * @dataProvider provideRequestWithAccount
+	 */
+	public function testRequestWithAccount($config, $account)
+	{
 		/** @var Config $config_to_use */
 		$config_to_use = self::$configs[$config];
-
-		$actor->setCustomer($customer);
-
-		$this->assertEquals($customer, $actor->getCustomer());
-		$this->assertNull($actor->getAccount());
-
+		
+		$actor = new Actor($config_to_use);
+		
+		$actor->setAccount($account);
+		
 		$request = $actor->newRequest('command', 'action');
-		if ($use_session)
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertSame($account, $request->getAccount());
+		if ($account === null)
 		{
-			$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
-			$request = new TestActorRequest($request);
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+			$this->assertEmpty($request->getAccounts());
 		}
 		else
 		{
-			$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
-			$request = new TestActorRequest($request);
+			$this->assertSame(array($account), $request->getAccounts());
 		}
-
-		$this->assertEquals($customer, $request->getCustomer());
-
+		
+		$this->assertSame($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$this->assertSame($config_to_use->getAuthenticationActorKey(), $request->signingKey());
+		
+		// We have set an account, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithAccount()
+	{
+		return array(
+			array('user', 'account123'),
+			array('user_default_account', 'account123'),
+			array('application', 'account123'),
+			array('user', null),
+			array('application', null),
+			array('application_default_account', null),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with the default account has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 *
+	 * @dataProvider provideRequestWithDefaultAccount
+	 */
+	public function testRequestWithDefaultAccount($config)
+	{
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertSame($config_to_use->getDefaultAccountId(), $request->getAccount());
+		if ($config_to_use->getDefaultAccountId() === null)
+		{
+			$this->assertEmpty($request->getAccounts());
+		}
+		else
+		{
+			$this->assertEquals(array($config_to_use->getDefaultAccountId()), $request->getAccounts());
+		}
+		$this->assertSame($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$this->assertSame($config_to_use->getAuthenticationActorKey(), $request->signingKey());
+		
+		// We have set an account, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithDefaultAccount()
+	{
+		return array(
+			array('user'),
+			array('user_default_account'),
+			array('application'),
+			array('application_default_account'),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with an account in a session has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param string|null $account
+	 *   The account to set / test
+	 *
+	 * @dataProvider provideRequestWithAccountInSession
+	 */
+	public function testRequestWithAccountInSession($config, $account)
+	{
+		/** @var Session $session */
+		$session = self::$sessions[$config];
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use, $session);
+		
+		$actor->setAccount($account);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertSame($account, $request->getAccount());
+		if ($account === null)
+		{
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+			$this->assertEmpty($request->getAccounts());
+		}
+		else
+		{
+			$this->assertSame(array($account), $request->getAccounts());
+		}
+		
+		$this->assertSame($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$session_id = $session->getSessionStore()->getId();
+		$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
+		$session_key = $session->getSessionStore()->getKey();
+		$this->assertSame($config_to_use->getAuthenticationActorKey() . $session_key,
+		                    $request->signingKey());
+		
+		// We have set an account, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithAccountInSession()
+	{
+		return array(
+			array('application', 'account123'),
+			array('application_default_account', 'account123'),
+			array('application', null),
+			array('application_default_account', null),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with a default account in a session has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 *
+	 * @dataProvider provideRequestWithDefaultAccountInSession
+	 */
+	public function testRequestWithDefaultAccountInSession($config)
+	{
+		/** @var Session $session */
+		$session = self::$sessions[$config];
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use, $session);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
+		$request = new TestActorRequest($request);
+		
+		if ($config_to_use->getDefaultAccountId() === null)
+		{
+			$this->assertEmpty($request->getAccounts());
+		}
+		else
+		{
+			$this->assertEquals(array($config_to_use->getDefaultAccountId()), $request->getAccounts());
+		}
+		$this->assertSame($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$session_id = $session->getSessionStore()->getId();
+		$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
+		$session_key = $session->getSessionStore()->getKey();
+		$this->assertSame($config_to_use->getAuthenticationActorKey() . $session_key,
+		                    $request->signingKey());
+		
+		// We have set an account, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithDefaultAccountInSession()
+	{
+		return array(
+			array('application'),
+			array('application_default_account'),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with accounts has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param array $accounts
+	 *   The accounts to set / test
+	 *
+	 * @dataProvider provideRequestWithAccounts
+	 */
+	public function testRequestWithAccounts($config, $accounts)
+	{
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use);
+		
+		$actor->setAccounts($accounts);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertEquals($accounts, $request->getAccounts());
+		if (empty($accounts))
+		{
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+			$this->assertNull($request->getAccount());
+		}
+		else
+		{
+			$this->assertSame($accounts[0], $request->getAccount());
+		}
+		
 		$this->assertEquals($config_to_use->getAuthenticationType(),
 		                    $request->getAuthenticationType());
 		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
 		                               $config_to_use->getAuthenticationActorId(),
 		                               $request->parametersForSigning());
-		if ($use_session)
+		
+		$this->assertEquals($config_to_use->getAuthenticationActorKey(), $request->signingKey());
+		
+		// We have set accounts, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithAccounts()
+	{
+		return array(
+			array('user', array('account123')),
+			array('user_default_account', array('account123')),
+			array('application', array('account123')),
+			array('user', array()),
+			array('application', array()),
+			array('application_default_account', array()),
+			array('user', array('account123', 'anotheraccount')),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with accounts in a session has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param array $accounts
+	 *   The accounts to set / test
+	 *
+	 * @dataProvider provideRequestWithAccountsInSession
+	 */
+	public function testRequestWithAccountsInSession($config, $accounts)
+	{
+		/** @var Session $session */
+		$session = self::$sessions[$config];
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use, $session);
+		
+		$actor->setAccounts($accounts);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertEquals($accounts, $request->getAccounts());
+		if (empty($accounts))
 		{
-			$session_id = $session_to_use->getSessionStore()->getId();
-			$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
-			$session_key = $session_to_use->getSessionStore()->getKey();
-			$this->assertEquals($config_to_use->getAuthenticationActorKey() . $session_key, $request->signingKey());
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+			$this->assertNull($request->getAccount());
 		}
 		else
 		{
-			$this->assertEquals($config_to_use->getAuthenticationActorKey(), $request->signingKey());
+			$this->assertSame($accounts[0], $request->getAccount());
 		}
-
-		$this->assertNull($request->getAccount());
-		$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+		
+		$this->assertEquals($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$session_id = $session->getSessionStore()->getId();
+		$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
+		$session_key = $session->getSessionStore()->getKey();
+		$this->assertEquals($config_to_use->getAuthenticationActorKey() . $session_key,
+		                    $request->signingKey());
+		
+		// We have set accounts, so there should not be a customer now
+		$this->assertNull($request->getCustomer());
+		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
-
-	public function provideSetCustomer()
+	
+	public function provideRequestWithAccountsInSession()
 	{
 		return array(
-			array('user', false, 'customerABC'),
-			array('user_default_account', false, 'customerABC'),
-			array('application', false, 'customerABC'),
-			array('application_default_account', false, 'customerABC'),
-			array('user', false, null),
-			array('user_default_account', false, null),
-			array('application', false, null),
-			array('application_default_account', false, null),
-			array('user', false, 'C'),
-			array('application', true, 'customerABC'),
-			array('application_default_account', true, 'customerABC'),
+			array('application', array('account123')),
+			array('application', array()),
+			array('application', array('account1', 'anotheraccount')),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with a customer has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param string|null $customer
+	 *   The customer to set / test
+	 *
+	 * @dataProvider provideRequestWithCustomer
+	 */
+	public function testRequestWithCustomer($config, $customer)
+	{
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use);
+		
+		$actor->setCustomer($customer);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\Request', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertEquals($customer, $request->getCustomer());
+		if ($customer === null)
+		{
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+		}
+		
+		$this->assertEquals($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$this->assertEquals($config_to_use->getAuthenticationActorKey(), $request->signingKey());
+		
+		// We have set a customer, so there should not be an account now
+		$this->assertNull($request->getAccount());
+		$this->assertEmpty($request->getAccounts());
+		$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithCustomer()
+	{
+		return array(
+			array('user', 'customer1'),
+			array('user_default_account', 'customer1'),
+			array('user', null),
+			array('user_default_account', null),
+		);
+	}
+	
+	/**
+	 * Test if creating a new request with a customer in a session has the intended behaaviour
+	 *
+	 * @param string $config
+	 *   The configuration to use
+	 * @param string|null $customer
+	 *   The customer to set / test
+	 *
+	 * @dataProvider provideRequestWithCustomerInSession
+	 */
+	public function testRequestWithCustomerInSession($config, $customer)
+	{
+		/** @var Session $session */
+		$session = self::$sessions[$config];
+		/** @var Config $config_to_use */
+		$config_to_use = self::$configs[$config];
+		
+		$actor = new Actor($config_to_use, $session);
+		
+		$actor->setCustomer($customer);
+		
+		$request = $actor->newRequest('command', 'action');
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionRequest', $request);
+		$request = new TestActorRequest($request);
+		
+		$this->assertEquals($customer, $request->getCustomer());
+		if ($customer === null)
+		{
+			// If the account to set is null, it should not be used as a parameter for signing
+			$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
+		}
+		
+		$this->assertEquals($config_to_use->getAuthenticationType(),
+		                    $request->getAuthenticationType());
+		$this->assertArrayKeySameValue($config_to_use->getAuthenticationType(),
+		                               $config_to_use->getAuthenticationActorId(),
+		                               $request->parametersForSigning());
+		
+		$session_id = $session->getSessionStore()->getId();
+		$this->assertArrayKeySameValue('session', $session_id, $request->parametersForSigning());
+		$session_key = $session->getSessionStore()->getKey();
+		$this->assertEquals($config_to_use->getAuthenticationActorKey() . $session_key,
+		                    $request->signingKey());
+		
+		// We have set a customer, so there should not be an account now
+		$this->assertNull($request->getAccount());
+		$this->assertEmpty($request->getAccounts());
+		$this->assertArrayNotHasKey('account', $request->parametersForSigning());
+	}
+	
+	public function provideRequestWithCustomerInSession()
+	{
+		return array(
+			array('application', 'customer1'),
+			array('application', null),
 		);
 	}
 
