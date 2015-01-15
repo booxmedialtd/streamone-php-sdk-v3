@@ -7,7 +7,7 @@ use StreamOne\API\v3\FileCache;
 /**
  * Test the FileCache
  */
-class fileCacheTest extends CacheInterfaceTest
+class FileCacheTest extends CacheInterfaceTest
 {
 	protected function constructCache()
 	{

@@ -47,6 +47,17 @@ class Session
 	}
 	
 	/**
+	 * Retrieve the session store used in this session
+	 * 
+	 * @retval SessionStoreInterface
+	 *   The session store used in this session
+	 */
+	public function getSessionStore()
+	{
+		return $this->session_store;
+	}
+	
+	/**
 	 * Check whether there is an active session
 	 * 
 	 * If there is no active session, it is only possible to start a new session.
