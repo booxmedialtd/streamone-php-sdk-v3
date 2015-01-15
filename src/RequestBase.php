@@ -106,6 +106,28 @@ abstract class RequestBase
 	}
 
 	/**
+	 * Get the account to use for this request
+	 *
+	 * If an account is not set, return null
+	 *
+	 * @return string|null
+	 *   The hash of the account to use for the request or null if no account is set
+	 */
+	public function getAccount()
+	{
+		if (isset($this->parameters['account']))
+		{
+			$accounts = explode(',', $this->parameters['account']);
+			if (count($accounts) == 1)
+			{
+				return $accounts[0];
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Set the accounts to use for this request
 	 *
 	 * Some actions allow you to set more than one account at the same time. Refer to the
@@ -125,6 +147,24 @@ abstract class RequestBase
 	}
 
 	/**
+	 * Get the accounts to use for this request
+	 *
+	 * If an accounts are set, return an empty array
+	 *
+	 * @return array()
+	 *   An array with the hashes of the accounts to use for the request
+	 */
+	public function getAccounts()
+	{
+		if (isset($this->parameters['account']))
+		{
+			return explode(',', $this->parameters['account']);
+		}
+
+		return array();
+	}
+
+	/**
 	 * Set the customer to use for this request
 	 *
 	 * Some actions require an account to be set and others have it as an alternative to an account.
@@ -140,6 +180,24 @@ abstract class RequestBase
 		$this->parameters['customer'] = $customer;
 
 		return $this;
+	}
+
+	/**
+	 * Get the customer to use for this request
+	 *
+	 * If an customer is not set, return null
+	 *
+	 * @return string|null
+	 *   The hash of the customer to use for the request or null if no customer is set
+	 */
+	public function getCustomer()
+	{
+		if (isset($this->parameters['customer']))
+		{
+			return $this->parameters['customer'];
+		}
+
+		return null;
 	}
 
 	/**
