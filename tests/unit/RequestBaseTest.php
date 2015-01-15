@@ -12,7 +12,7 @@ class TestRequestBase extends RequestBase
 	/// Signing key to use
 	public $signing_key = "PSK";
 	/// Response to return from sendRequest
-	public $response = '{"header":{"status":0,"statusmessage:0},"body":null}';
+	public $response = '{"header":{"status":0,"statusmessage":0},"body":null}';
 	
 	/// Server given to sendRequest; initially null
 	public $sent_server = null;

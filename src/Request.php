@@ -69,6 +69,12 @@ class Request extends RequestBase
 		parent::__construct($command, $action);
 		
 		$this->config = $config;
+
+		// Check if a default account is specified and set it as a parameter. Can later be overridden
+		if ($this->config->hasDefaultAccountId())
+		{
+			$this->parameters['account'] = $this->config->getDefaultAccountId();
+		}
 		
 		// Validate configuration
 		if (!$config->validateForRequests())
@@ -190,13 +196,6 @@ class Request extends RequestBase
 			case Config::AUTH_APPLICATION:
 				$parameters['application'] = $actor_id;
 				break;
-		}
-		
-		// Check if a default account is specified, and it is not overridden for this request
-		if (!isset($parameters['account']) && !isset($parameters['customer']) &&
-		    $this->config->hasDefaultAccountId())
-		{
-			$parameters['account'] = $this->config->getDefaultAccountId();
 		}
 		
 		return $parameters;
