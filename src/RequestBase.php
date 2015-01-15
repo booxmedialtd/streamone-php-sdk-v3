@@ -93,14 +93,27 @@ abstract class RequestBase
 	 * Most actions require an account to be set, but not all. Refer to the documentation of the
 	 * action you are executing to read whether providing an account is required or not.
 	 *
-	 * @param string $account
-	 *   Hash of the account to use for the request
+	 * @param string|null $account
+	 *   Hash of the account to use for the request; if null, clear account
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccount($account)
 	{
-		$this->parameters['account'] = $account;
+		if ($account === null && isset($this->parameters['account']))
+		{
+			unset($this->parameters['account']);
+		}
+		elseif ($account !== null)
+		{
+			$this->parameters['account'] = $account;
+		}
+		
+		// If a customer is set clear it, because account and customer are mutually exclusive
+		if (isset($this->parameters['customer']))
+		{
+			unset($this->parameters['customer']);
+		}
 
 		return $this;
 	}
@@ -135,13 +148,26 @@ abstract class RequestBase
 	 * account is allowed or not.
 	 *
 	 * @param array $accounts
-	 *   Array with hashes of the accounts to use for the request
+	 *   Array with hashes of the accounts to use for the request; if empty, clear accounts
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccounts(array $accounts)
 	{
-		$this->parameters['account'] = implode(',', $accounts);
+		if (empty($accounts) && isset($this->parameters['account']))
+		{
+			unset($this->parameters['account']);
+		}
+		elseif (!empty($accounts))
+		{
+			$this->parameters['account'] = implode(',', $accounts);
+		}
+
+		// If a customer is set clear it, because account and customer are mutually exclusive
+		if (isset($this->parameters['customer']))
+		{
+			unset($this->parameters['customer']);
+		}
 
 		return $this;
 	}
@@ -170,14 +196,27 @@ abstract class RequestBase
 	 * Some actions require an account to be set and others have it as an alternative to an account.
 	 * Refer to the documentation to check whether it is needed
 	 *
-	 * @param string $customer
-	 *   Hash of the customer to use for the request
+	 * @param string|null $customer
+	 *   Hash of the customer to use for the request; if null clear customer
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setCustomer($customer)
 	{
-		$this->parameters['customer'] = $customer;
+		if ($customer === null && isset($this->parameters['customer']))
+		{
+			unset($this->parameters['customer']);
+		}
+		elseif ($customer !== null)
+		{
+			$this->parameters['customer'] = $customer;
+		}
+
+		// If an account is set clear it, because account and customer are mutually exclusive
+		if (isset($this->parameters['account']))
+		{
+			unset($this->parameters['account']);
+		}
 
 		return $this;
 	}
