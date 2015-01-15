@@ -8,6 +8,14 @@ namespace StreamOne\API\v3;
 
 /**
  * Interface for session storage
+ * 
+ * As a part of storing session information, session stores can also be asked to cache certain
+ * information for the duration of the session. For example, the tokens that the session user has
+ * can be stored in the session. This is subject to the following conditions:
+ * 
+ * - Data cached in a session will always be cached for exactly the lifetime of the session.
+ * 
+ * - It is only allowed to store serializable data in the cache.
  */
 interface SessionStoreInterface
 {
@@ -84,6 +92,50 @@ interface SessionStoreInterface
 	 *   The number of seconds before this session expires; negative if the session has expired
 	 */
 	public function getTimeout();
+	
+	/**
+	 * Check if a certain key is stored in the cache
+	 * 
+	 * @param string $key
+	 *   Cache key to check for existence
+	 * @retval bool
+	 *   True if and only if the given key is set in the cache
+	 */
+	public function hasCacheKey($key);
+	
+	/**
+	 * Retrieve a stored cache key
+	 * 
+	 * The behavior of this method is undefined if a non-existing cache key is retrieved; always
+	 * check for existance of the key using hasCacheKey($key).
+	 * 
+	 * @param string $key
+	 *   Cache key to get the cached value of
+	 * @retval mixed
+	 *   The cached value
+	 */
+	public function getCacheKey($key);
+	
+	/**
+	 * Store a cache key
+	 * 
+	 * @param string $key
+	 *   Cache key to store a value for
+	 * @param mixed $value
+	 *   Value to store for the given key
+	 */
+	public function setCacheKey($key, $value);
+	
+	/**
+	 * Unset a cached value
+	 * 
+	 * The behavior of this method is undefined if a non-existing cache key is unset; always
+	 * check for existance of the key using hasCacheKey($key).
+	 * 
+	 * @param string $key
+	 *   Cache key to unset
+	 */
+	public function unsetCacheKey($key);
 }
 
 /**
