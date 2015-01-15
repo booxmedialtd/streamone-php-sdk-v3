@@ -161,7 +161,7 @@ class Actor
 		}
 		else
 		{
-			$this->setAccount(null);
+			$request->setAccount(null);
 		}
 
 		return $request;
