@@ -11,7 +11,16 @@ namespace StreamOne\API\v3;
  */
 class PhpSessionStore implements SessionStoreInterface
 {
-	const S1_SESSION_PREFIX = 'streamone_session_';
+	/// Array key for storing the session ID in $_SESSION
+	const ID_KEY = 'streamone_session_id';
+	/// Array key for storing the session key in $_SESSION
+	const KEY_KEY = 'streamone_session_key';
+	/// Array key for storing the session timeout in $_SESSION
+	const TIMEOUT_KEY = 'streamone_session_timeout';
+	/// Array key for storing the session user ID in $_SESSION
+	const USER_ID_KEY = 'streamone_session_user_id';
+	/// Array key for storing the cached data in $_SESSION
+	const CACHE_KEY = 'streamone_session_cache';
 
 	/**
 	 * Start the PHP session if not already done so
@@ -29,21 +38,23 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function hasSession()
 	{
-		$all_set = (isset($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
-		            isset($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
-		            isset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
-		            isset($_SESSION[self::S1_SESSION_PREFIX . 'user']) &&
-		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'id']) &&
-		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'key']) &&
-		            is_numeric($_SESSION[self::S1_SESSION_PREFIX . 'timeout']) &&
-		            is_string($_SESSION[self::S1_SESSION_PREFIX . 'user']));
+		$all_set = (isset($_SESSION[self::ID_KEY]) &&
+		            isset($_SESSION[self::KEY_KEY]) &&
+		            isset($_SESSION[self::TIMEOUT_KEY]) &&
+		            isset($_SESSION[self::USER_ID_KEY]) &&
+		            isset($_SESSION[self::CACHE_KEY]) &&
+		            is_string($_SESSION[self::ID_KEY]) &&
+		            is_string($_SESSION[self::KEY_KEY]) &&
+		            is_numeric($_SESSION[self::TIMEOUT_KEY]) &&
+		            is_string($_SESSION[self::USER_ID_KEY]) &&
+		            is_array($_SESSION[self::CACHE_KEY]));
 
 		if (!$all_set)
 		{
 			return false;
 		}
 
-		if ($_SESSION[self::S1_SESSION_PREFIX . 'timeout'] > time())
+		if ($_SESSION[self::TIMEOUT_KEY] > time())
 		{
 			return true;
 		}
@@ -60,10 +71,11 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function clearSession()
 	{
-		unset($_SESSION[self::S1_SESSION_PREFIX . 'id']);
-		unset($_SESSION[self::S1_SESSION_PREFIX . 'key']);
-		unset($_SESSION[self::S1_SESSION_PREFIX . 'timeout']);
-		unset($_SESSION[self::S1_SESSION_PREFIX . 'user']);
+		unset($_SESSION[self::ID_KEY]);
+		unset($_SESSION[self::KEY_KEY]);
+		unset($_SESSION[self::TIMEOUT_KEY]);
+		unset($_SESSION[self::USER_ID_KEY]);
+		unset($_SESSION[self::CACHE_KEY]);
 	}
 
 	/**
@@ -71,10 +83,11 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function setSession($id, $key, $user_id, $timeout)
 	{
-		$_SESSION[self::S1_SESSION_PREFIX . 'id'] = $id;
-		$_SESSION[self::S1_SESSION_PREFIX . 'key'] = $key;
-		$_SESSION[self::S1_SESSION_PREFIX . 'user'] = $user_id;
-		$_SESSION[self::S1_SESSION_PREFIX . 'timeout'] = time() + $timeout;
+		$_SESSION[self::ID_KEY] = $id;
+		$_SESSION[self::KEY_KEY] = $key;
+		$_SESSION[self::USER_ID_KEY] = $user_id;
+		$_SESSION[self::TIMEOUT_KEY] = time() + $timeout;
+		$_SESSION[self::CACHE_KEY] = array();
 	}
 
 	/**
@@ -82,7 +95,7 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function setTimeout($timeout)
 	{
-		$_SESSION[self::S1_SESSION_PREFIX . 'timeout'] = time() + $timeout;
+		$_SESSION[self::TIMEOUT_KEY] = time() + $timeout;
 	}
 	
 	/**
@@ -90,7 +103,7 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function getId()
 	{
-		return $_SESSION[self::S1_SESSION_PREFIX . 'id'];
+		return $_SESSION[self::ID_KEY];
 	}
 	
 	/**
@@ -98,7 +111,7 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function getKey()
 	{
-		return $_SESSION[self::S1_SESSION_PREFIX . 'key'];
+		return $_SESSION[self::KEY_KEY];
 	}
 	
 	/**
@@ -106,7 +119,7 @@ class PhpSessionStore implements SessionStoreInterface
 	 */
 	public function getUserId()
 	{
-		return $_SESSION[self::S1_SESSION_PREFIX . 'user'];
+		return $_SESSION[self::USER_ID_KEY];
 	}
 	
 	/**
@@ -115,7 +128,39 @@ class PhpSessionStore implements SessionStoreInterface
 	public function getTimeout()
 	{
 		// Return difference between timeout moment and now
-		return ($_SESSION[self::S1_SESSION_PREFIX . 'timeout'] - time());
+		return ($_SESSION[self::TIMEOUT_KEY] - time());
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::hasCacheKey()
+	 */
+	public function hasCacheKey($key)
+	{
+		return array_key_exists($key, $_SESSION[self::CACHE_KEY]);
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::getCacheKey()
+	 */
+	public function getCacheKey($key)
+	{
+		return $_SESSION[self::CACHE_KEY][$key];
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::setCacheKey()
+	 */
+	public function setCacheKey($key, $value)
+	{
+		$_SESSION[self::CACHE_KEY][$key] = $value;
+	}
+	
+	/**
+	 * @copydoc SessionStoreInterface::unsetCacheKey()
+	 */
+	public function unsetCacheKey($key)
+	{
+		unset($_SESSION[self::CACHE_KEY][$key]);
 	}
 }
 

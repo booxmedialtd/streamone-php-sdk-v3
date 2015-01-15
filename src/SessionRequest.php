@@ -31,7 +31,7 @@ class SessionRequest extends Request
 	 * @param SessionStoreInterface $session_store
 	 *   The session store containing the required session information
 	 * 
-	 * @throw InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   Application authentication is not in use; it is required to use application
 	 *   authentication for sessions to function
 	 * 
@@ -42,8 +42,7 @@ class SessionRequest extends Request
 	{
 		if ($config->getAuthenticationType() !== Config::AUTH_APPLICATION)
 		{
-			throw new \InvalidArgumentException("Sessions are only supported when application
-			authentication is used");
+			throw new \InvalidArgumentException("Sessions are only supported when application authentication is used");
 		}
 		
 		parent::__construct($command, $action, $config);

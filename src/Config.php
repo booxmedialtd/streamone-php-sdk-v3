@@ -73,18 +73,23 @@ class Config
 	 *                       - see setDefaultAccountId()
 	 * - visible_errors: an array of status codes that result in a very visible error bar
 	 *                   - see setVisibleErrors()
-	 * - cache: caching object to use; must implement CacheInterface
-	 *          - see setCache()
-	 * - session_store: session store to use; must implement SessionStoreInterface
-	 *                  - see setSessionStore()
+	 * - cache: caching object to use, implementing CacheInterface, or an array with the correct
+	 *          arguments to constructCache() to create one
+	 *          - see setCache() and constructCache()
+	 * - session_store: session store to use, implementing SessionStoreInterface, or an array with
+	 *                  the correct arguments to constructSessionStore() to create one
+	 *                  - see setSessionStore() and constructSessionStore()
 	 * 
 	 * @param array $options
 	 *   A key=>value array of options to use
 	 * 
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *   An authentication type is provided, but the necessary fields for that authentication type
 	 *   are not provided. For user authentication, user_id and user_psk must be provided. For
 	 *   application authentication, application_id and application_psk must be provided.
+	 * @throws \InvalidArgumentException
+	 *   The provided cache or session_store was either an incorrect class, or not an array with
+	 *   the correct options for the corresponding factory method.
 	 */
 	public function __construct(array $options)
 	{
@@ -97,8 +102,6 @@ class Config
 			'api_url' => 'setApiUrl',
 			'default_account_id' => 'setDefaultAccountId',
 			'visible_errors' => 'setVisibleErrors',
-			'cache' => 'setCache',
-			'session_store' => 'setSessionStore'
 		);
 		
 		foreach ($allowed_options as $key => $method)
@@ -138,6 +141,154 @@ class Config
 					                                   $options['authentication_type'] . "'");
 			}
 		}
+		
+		// Check possibly to be constructed objects
+		$object_options = array(
+			'cache' => array(
+				'class' => 'StreamOne\\API\\v3\\CacheInterface',
+				'factory' => 'constructCache',
+				'setter' => 'setCache',
+			),
+			'session_store' => array(
+				'class' => 'StreamOne\\API\\v3\\SessionStoreInterface',
+				'factory' => 'constructSessionStore',
+				'setter' => 'setSessionStore',
+			),
+		);
+		
+		foreach ($object_options as $key => $data)
+		{
+			if (array_key_exists($key, $options))
+			{
+				$object = $options[$key];
+				
+				// Call factory method if the option is set as an array
+				if (is_array($object))
+				{
+					// Check that a class name is given
+					if ((count($object) < 1) || !is_string($object[0]))
+					{
+						throw new \InvalidArgumentException("No class name given for " . $key .
+						                                    " constructor");
+					}
+					// This will throw InvalidArgumentException on errors
+					$object = call_user_func_array(array($this, $data['factory']), $object);
+				}
+				
+				// Check if we have an object of the correct type
+				if (!($object instanceof $data['class']))
+				{
+					throw new \InvalidArgumentException("Given " . $key . " does not implement " .
+					                                    $data['class']);
+				}
+				
+				// Set the correct option with the constructed object
+				call_user_func(array($this, $data['setter']), $object);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Resolve a class name to a ReflectionClass
+	 * 
+	 * This method attemps to resolve a class name to a ReflectionClass, but first looking for
+	 * the given class name in the StreamOne\API\v3 namespace, and if not found there, it looks
+	 * in the global scope.
+	 * 
+	 * @param string $name
+	 *   Name of the class to resolve
+	 * @retval ReflectionClass
+	 *   A ReflectionClass instance for the given class name
+	 * 
+	 * @throws \InvalidArgumentException
+	 *   The given class name does not resolve to a valid class
+	 */
+	protected function resolveReflectionClass($name)
+	{
+		// Attempt to resolve class in the SDK namespace first
+		$class_name = "StreamOne\\API\\v3\\" . $name;
+		if (class_exists($class_name))
+		{
+			return new \ReflectionClass($class_name);
+		}
+		
+		// Attempt to resolve class in the global namespace
+		if (class_exists($name))
+		{
+			return new \ReflectionClass($name);
+		}
+		
+		// Class not found
+		throw new \InvalidArgumentException("Class '" . $name . "' not found");
+	}
+	
+	/**
+	 * Construct a cache
+	 * 
+	 * @param string $name
+	 *   Name of the cache object to construct; can either be a class within the StreamOne\API\v3
+	 *   namespace, or one in the global namespace. Will be resolved in that order. The referenced
+	 *   class must implement CacheInterface.
+	 * @param mixed $name,...
+	 *   Constructor arguments for the specified cache
+	 * @retval CacheInterface
+	 *   The constructed cache
+	 * 
+	 * @throws \InvalidArgumentException
+	 *   There is no class named $name, it does not implement CacheInterface, or the passed
+	 *   constructor arguments are invalid.
+	 */
+	public function constructCache($name)
+	{
+		// Will throw InvalidArgumentException if class does not exist
+		$class = $this->resolveReflectionClass($name);
+		
+		// Check if class implements CacheInterface
+		if (!$class->implementsInterface('StreamOne\\API\\v3\\CacheInterface'))
+		{
+			throw new \InvalidArgumentException("Class " . $name . " does not implement CacheInterface");
+		}
+		
+		// Construct cache from arguments and return it
+		$args = func_get_args();
+		array_shift($args);
+		
+		return $class->newInstanceArgs($args);
+	}
+	
+	/**
+	 * Construct a session store
+	 * 
+	 * @param string $name
+	 *   Name of the session store object to construct; can either be a class within the
+	 *   StreamOne\API\v3 namespace, or one in the global namespace. Will be resolved in
+	 *   that order. The referenced class must implement SessionStoreInterface.
+	 * @param mixed $name,...
+	 *   Constructor arguments for the specified session store
+	 * @retval SessionStoreInterface
+	 *   The constructed session store
+	 * 
+	 * @throws \InvalidArgumentException
+	 *   There is no class named $name, it does not implement SessionStoreInterface, or the passed
+	 *   constructor arguments are invalid.
+	 */
+	public function constructSessionStore($name)
+	{
+		// Will throw InvalidArgumentException if class does not exist
+		$class = $this->resolveReflectionClass($name);
+		
+		// Check if class implements SessionStoreInterface
+		if (!$class->implementsInterface('StreamOne\\API\\v3\\SessionStoreInterface'))
+		{
+			throw new \InvalidArgumentException("Class " . $name . " does not implement SessionStoreInterface");
+		}
+		
+		// Construct session store from arguments and return it
+		$args = func_get_args();
+		array_shift($args);
+		
+		return $class->newInstanceArgs($args);
 	}
 	
 	

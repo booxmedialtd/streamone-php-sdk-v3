@@ -61,7 +61,7 @@ class Request extends RequestBase
 	 * @param Config $config
 	 *   The Config object to use for this request
 	 * 
-	 * @throw UnexpectedValueException
+	 * @throw \UnexpectedValueException
 	 *   The given Config object is not valid for performing requests
 	 */
 	public function __construct($command, $action, Config $config)
