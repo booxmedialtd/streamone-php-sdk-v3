@@ -115,7 +115,7 @@ class Session
 		$request->setArgument('response', $response);
 		if ($needs_v2_hash)
 		{
-			$vs_hash = Password::generateV2PasswordHash($password);
+			$v2_hash = Password::generateV2PasswordHash($password);
 			$request->setArgument('v2hash', $v2_hash);
 		}
 		$request->execute();

@@ -86,4 +86,20 @@ class Platform
 	{
 		return new Session($this->config, $session_store);
 	}
+	
+	/**
+	 * Create an Actor object to perform requests as an actor
+	 * 
+	 * @param Session|null $session
+	 *   If given, the actor will use this session to act upon (i.e. it will be a user
+	 *   actor with the given user information); if not given, use actor information
+	 *   from the configuration
+	 * 
+	 * @retval Actor
+	 *   The created actor object
+	 */
+	public function newActor(Session $session = null)
+	{
+		return new Actor($this->config, $session);
+	}
 }

@@ -94,7 +94,7 @@ abstract class RequestBase
 	 * action you are executing to read whether providing an account is required or not.
 	 *
 	 * @param string|null $account
-	 *   Hash of the account to use for the request; if null, clear account
+	 *   ID of the account to use for the request; if null, clear account
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -119,6 +119,29 @@ abstract class RequestBase
 	}
 
 	/**
+	 * Get the account to use for this request
+	 *
+	 * If an account is not set, return null
+	 *
+	 * @return string|null
+	 *   The ID of the account to use for the request or null if no account is set. If more than
+	 *   one account has been set (with setAccounts), the first one will be returned
+	 */
+	public function getAccount()
+	{
+		if (isset($this->parameters['account']))
+		{
+			$accounts = explode(',', $this->parameters['account']);
+			if (!empty($accounts))
+			{
+				return $accounts[0];
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Set the accounts to use for this request
 	 *
 	 * Some actions allow you to set more than one account at the same time. Refer to the
@@ -126,7 +149,7 @@ abstract class RequestBase
 	 * account is allowed or not.
 	 *
 	 * @param array $accounts
-	 *   Array with hashes of the accounts to use for the request; if empty, clear accounts
+	 *   Array with IDs of the accounts to use for the request; if empty, clear accounts
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -151,13 +174,31 @@ abstract class RequestBase
 	}
 
 	/**
+	 * Get the accounts to use for this request
+	 *
+	 * If an accounts are set, return an empty array
+	 *
+	 * @return array()
+	 *   An array with the IDs of the accounts to use for the request
+	 */
+	public function getAccounts()
+	{
+		if (isset($this->parameters['account']))
+		{
+			return explode(',', $this->parameters['account']);
+		}
+
+		return array();
+	}
+
+	/**
 	 * Set the customer to use for this request
 	 *
 	 * Some actions require an account to be set and others have it as an alternative to an account.
 	 * Refer to the documentation to check whether it is needed
 	 *
 	 * @param string|null $customer
-	 *   Hash of the customer to use for the request; if null clear customer
+	 *   ID of the customer to use for the request; if null clear customer
 	 * @retval RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
@@ -179,6 +220,24 @@ abstract class RequestBase
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get the customer to use for this request
+	 *
+	 * If an customer is not set, return null
+	 *
+	 * @return string|null
+	 *   The ID of the customer to use for the request or null if no customer is set
+	 */
+	public function getCustomer()
+	{
+		if (isset($this->parameters['customer']))
+		{
+			return $this->parameters['customer'];
+		}
+
+		return null;
 	}
 
 	/**
