@@ -331,7 +331,7 @@ class Config
 	 */
 	public function setUserAuthentication($user_id, $user_psk)
 	{
-		$this->authentication_type = self::AUTH_APPLICATION;
+		$this->authentication_type = self::AUTH_USER;
 		$this->auth_actor_id = $user_id;
 		$this->auth_actor_psk = $user_psk;
 	}
