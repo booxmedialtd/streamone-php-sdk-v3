@@ -17,7 +17,7 @@ class MySessionStore extends MemorySessionStore
 }
 
 /**
- * Test for the abstract RequestBase class
+ * Tests for the Config class
  */
 class ConfigTest extends PHPUnit_TestCase
 {
