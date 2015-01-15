@@ -127,6 +127,17 @@ class Actor
 	{
 		return $this->accounts;
 	}
+	
+	/**
+	 * Whether this actor is for at least one account
+	 *
+	 * @retval bool
+	 *   True if and only if this actor is for at least one account
+	 */
+	protected function hasAccounts()
+	{
+		return !empty($this->accounts);
+	}
 
 	/**
 	 * Set the customer to use for this actor
@@ -192,6 +203,277 @@ class Actor
 		}
 
 		return $request;
+	}
+	
+	/**
+	 * Check if this actor has a given token.
+	 * 
+	 * Tokens will be fetched from the StreamOne API
+	 * 
+	 * @param string $token
+	 *   The token to check for
+	 * @retval bool
+	 *   True if and only if the current actor has the given token
+	 * @throws RequestException
+	 *   If loading the roles from the API failed
+	 */
+	public function hasToken($token)
+	{
+		$roles = $this->getRoles();
+		
+		if ($this->shouldCheckMyTokens($roles))
+		{
+			return $this->checkMyTokens($token);
+		}
+		elseif (!$this->hasAccounts())
+		{
+			
+			return $this->checkNonAccountHasToken($roles, $token);
+		}
+		else
+		{
+			return $this->checkAccountHasToken($roles, $token);
+		}
+	}
+	
+	/**
+	 * Check whether the api/myroles action should be used to check for tokens
+	 * 
+	 * This is only the if this actor is for at least one account and the actor has rights in at
+	 * least one customer
+	 * 
+	 * @param array $roles
+	 *   The roles as returned from the getmyroles API actions
+	 * @retval bool
+	 *   True if and only if the api/myroles action should be checked for tokens
+	 */
+	protected function shouldCheckMyTokens($roles)
+	{
+		if ($this->hasAccounts())
+		{
+			foreach ($roles as $role)
+			{
+				if (isset($role['customer']))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Use the "mytokens" to check if the current actor has the given token
+	 * 
+	 * @param string $token
+	 *   The token to check for
+	 * @retval bool
+	 *   True if and only if the current actor has the given token
+	 * @throws RequestException
+	 *   If loading the tokens from the API failed
+	 */
+	protected function checkMyTokens($token)
+	{
+		$tokens = $this->getMyTokens();
+		
+		return in_array($token, $tokens);
+	}
+	
+	/**
+	 * Get the tokens for the current actor
+	 * 
+	 * @retval array
+	 *   The tokens for the current actor
+	 * @throws RequestException
+	 *   If loading the tokens from the API failed
+	 */
+	protected function getMyTokens()
+	{
+		// TODO: caching
+		
+		return $this->loadMyTokensFromApi();
+	}
+	
+	/**
+	 * Load the tokens for the current actor from the API
+	 * 
+	 * @retval array
+	 *   The tokens for the current actor
+	 * @throws RequestException
+	 *   If loading the tokens from the API failed
+	 */
+	protected function loadMyTokensFromApi()
+	{
+		$request = $this->newRequest('api', 'mytokens');
+		$request->execute();
+		
+		if (!$request->success())
+		{
+			throw RequestException::fromRequest($request);
+		}
+		
+		return $request->body();
+	}
+	
+	/**
+	 * Check if an actor not having an account has a given token
+	 * 
+	 * This function should be caeed if hasAccounts() returns false and shouldCheckMyTokens() also
+	 * returns false
+	 *
+	 * @param array $roles
+	 *   The roles as returned from the getmyroles API actions
+	 * @param string $token
+	 *   The token to check
+	 * @retval bool
+	 *   True if and only if the current actor has the given token in any role, taking into account
+	 *   customers
+	 */
+	protected function checkNonAccountHasToken($roles, $token)
+	{
+		foreach ($roles as $role)
+		{
+			if ($this->checkRoleForToken($role, $token))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Check if an actor having at least one account has a given token
+	 * 
+	 * This function should be called if hasAccounts() returns true and shouldCheckMyTokens()
+	 * returns false
+	 *
+	 * @param array $roles
+	 *   The roles as returned from the getmyroles API actions
+	 * @param string $token
+	 *   The token to check
+	 * @retval bool
+	 *   True if and only if the current actor has the given token in any role, taking into account
+	 *   customers and accounts
+	 */
+	protected function checkAccountHasToken($roles, $token)
+	{
+		$num_ok = 0;
+		foreach ($this->accounts as $account)
+		{
+			foreach ($roles as $role)
+			{
+				if ($this->checkRoleForToken($role, $token, $account))
+				{
+					$num_ok++;
+					break;
+				}
+			}
+		}
+		return $num_ok == count($this->accounts);
+	}
+	
+	/**
+	 * Check if a given role has a specific token
+	 * 
+	 * It will always use the customer of this actor, but the account can be specified
+	 *
+	 * @param array $role
+	 *   The role as returned from the getmyroles API actions
+	 * @param string $token
+	 *   The token to check
+	 * @param string|null $account
+	 *   The account to use for checking
+	 * @retval bool
+	 *   True if and only if the given role has the given token and is a super-role if the given
+	 *   customer and account
+	 */
+	protected function checkRoleForToken($role, $token, $account = null)
+	{
+		return ($this->roleIsSuperOf($role, $this->customer, $account) &&
+			in_array($token, $role['role']['tokens']));
+	}
+	
+	/**
+	 * Get the roles for the current configuration and session
+	 * 
+	 * @retval array
+	 *   An array containing all the roles for the current configuration and session
+	 * @throws RequestException
+	 *   If loading the roles from the API failed
+	 */
+	protected function getRoles()
+	{
+		// TODO: caching
+		
+		if ($this->session !== null || $this->config->getAuthenticationType() == Config::AUTH_USER)
+		{
+			$actor = 'user';
+		}
+		else
+		{
+			$actor = 'application';
+		}
+		return $this->loadRolesFromApi($actor);
+	}
+	
+	/**
+	 * Load the roles of the current configuration and session from the API
+	 * 
+	 * @param string $actor
+	 *   Whether the roles of a user or application should be loaded
+	 * @retval array
+	 *   The roles for the current configuration and session, loaded from the API
+	 * @throws RequestException
+	 *   If loading the roles from the API failed
+	 */
+	protected function loadRolesFromApi($actor)
+	{
+		$request = $this->newRequest($actor, 'getmyroles');
+		$request->execute();
+		
+		if (!$request->success())
+		{
+			throw RequestException::fromRequest($request);
+		}
+		
+		return $request->body();
+	}
+	
+	/**
+	 * Determine if a given role is a super-role of a given customer and/or account
+	 * 
+	 * A role is a super-role if:
+	 * - It is a role without a customer or account
+	 * - It is a role with a customer (and without an account) and the customer matches the given argument
+	 * - It is a role with an account and the account matches the given argument
+	 * 
+	 * @param array $role
+	 *   The role as returned from the getmyroles API actions
+	 * @param string|null $customer
+	 *   The customer to check for or null if no customer
+	 * @param string|null $account
+	 *   The account to check for or null if no account
+	 * @retval bool
+	 *   True if and only if the given role is a super-role of the given arguments
+	 */
+	protected function roleIsSuperOf($role, $customer, $account = null)
+	{
+		if (!isset($role['customer']) && !isset($role['account']))
+		{
+			return true;
+		}
+		
+		if (!isset($role['account']) && $customer !== null && $role['customer']['id'] == $customer)
+		{
+			return true;
+		}
+		
+		if (isset($role['account']) && $account !== null && $role['account']['id'] == $account)
+		{
+			return true;
+		}
+		
+		return false;
 	}
 }
 
