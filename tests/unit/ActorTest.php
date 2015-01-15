@@ -306,9 +306,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string|null $account
 	 *   The account to set / test
 	 *
-	 * @dataProvider provideRequestWithAccount
+	 * @dataProvider provideNewRequestWithAccount
 	 */
-	public function testRequestWithAccount($config, $account)
+	public function testNewRequestWithAccount($config, $account)
 	{
 		/** @var Config $config_to_use */
 		$config_to_use = self::$configs[$config];
@@ -347,7 +347,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithAccount()
+	public function provideNewRequestWithAccount()
 	{
 		return array(
 			array('user', 'account123'),
@@ -365,9 +365,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string $config
 	 *   The configuration to use
 	 *
-	 * @dataProvider provideRequestWithDefaultAccount
+	 * @dataProvider provideNewRequestWithDefaultAccount
 	 */
-	public function testRequestWithDefaultAccount($config)
+	public function testNewRequestWithDefaultAccount($config)
 	{
 		/** @var Config $config_to_use */
 		$config_to_use = self::$configs[$config];
@@ -401,7 +401,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithDefaultAccount()
+	public function provideNewRequestWithDefaultAccount()
 	{
 		return array(
 			array('user'),
@@ -419,9 +419,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string|null $account
 	 *   The account to set / test
 	 *
-	 * @dataProvider provideRequestWithAccountInSession
+	 * @dataProvider provideNewRequestWithAccountInSession
 	 */
-	public function testRequestWithAccountInSession($config, $account)
+	public function testNewRequestWithAccountInSession($config, $account)
 	{
 		/** @var Session $session */
 		$session = self::$sessions[$config];
@@ -466,7 +466,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithAccountInSession()
+	public function provideNewRequestWithAccountInSession()
 	{
 		return array(
 			array('application', 'account123'),
@@ -482,9 +482,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string $config
 	 *   The configuration to use
 	 *
-	 * @dataProvider provideRequestWithDefaultAccountInSession
+	 * @dataProvider provideNewRequestWithDefaultAccountInSession
 	 */
-	public function testRequestWithDefaultAccountInSession($config)
+	public function testNewRequestWithDefaultAccountInSession($config)
 	{
 		/** @var Session $session */
 		$session = self::$sessions[$config];
@@ -523,7 +523,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithDefaultAccountInSession()
+	public function provideNewRequestWithDefaultAccountInSession()
 	{
 		return array(
 			array('application'),
@@ -539,9 +539,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param array $accounts
 	 *   The accounts to set / test
 	 *
-	 * @dataProvider provideRequestWithAccounts
+	 * @dataProvider provideNewRequestWithAccounts
 	 */
-	public function testRequestWithAccounts($config, $accounts)
+	public function testNewRequestWithAccounts($config, $accounts)
 	{
 		/** @var Config $config_to_use */
 		$config_to_use = self::$configs[$config];
@@ -580,7 +580,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithAccounts()
+	public function provideNewRequestWithAccounts()
 	{
 		return array(
 			array('user', array('account123')),
@@ -601,9 +601,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param array $accounts
 	 *   The accounts to set / test
 	 *
-	 * @dataProvider provideRequestWithAccountsInSession
+	 * @dataProvider provideNewRequestWithAccountsInSession
 	 */
-	public function testRequestWithAccountsInSession($config, $accounts)
+	public function testNewRequestWithAccountsInSession($config, $accounts)
 	{
 		/** @var Session $session */
 		$session = self::$sessions[$config];
@@ -648,7 +648,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('customer', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithAccountsInSession()
+	public function provideNewRequestWithAccountsInSession()
 	{
 		return array(
 			array('application', array('account123')),
@@ -665,9 +665,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string|null $customer
 	 *   The customer to set / test
 	 *
-	 * @dataProvider provideRequestWithCustomer
+	 * @dataProvider provideNewRequestWithCustomer
 	 */
-	public function testRequestWithCustomer($config, $customer)
+	public function testNewRequestWithCustomer($config, $customer)
 	{
 		/** @var Config $config_to_use */
 		$config_to_use = self::$configs[$config];
@@ -702,7 +702,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('account', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithCustomer()
+	public function provideNewRequestWithCustomer()
 	{
 		return array(
 			array('user', 'customer1'),
@@ -720,9 +720,9 @@ class ActorTest extends PHPUnit_TestCase
 	 * @param string|null $customer
 	 *   The customer to set / test
 	 *
-	 * @dataProvider provideRequestWithCustomerInSession
+	 * @dataProvider provideNewRequestWithCustomerInSession
 	 */
-	public function testRequestWithCustomerInSession($config, $customer)
+	public function testNewRequestWithCustomerInSession($config, $customer)
 	{
 		/** @var Session $session */
 		$session = self::$sessions[$config];
@@ -763,7 +763,7 @@ class ActorTest extends PHPUnit_TestCase
 		$this->assertArrayNotHasKey('account', $request->parametersForSigning());
 	}
 	
-	public function provideRequestWithCustomerInSession()
+	public function provideNewRequestWithCustomerInSession()
 	{
 		return array(
 			array('application', 'customer1'),
