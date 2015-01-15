@@ -80,8 +80,8 @@ class RequestTest extends PHPUnit_TestCase
 			array(
 				'api_url' => 'api',
 				'authentication_type' => 'user',
-				'user_id' => 'application',
-				'user_psk' => 'apppsk',
+				'user_id' => 'user',
+				'user_psk' => 'psk',
 				'default_account_id' => 'account'
 			)
 		);
@@ -89,8 +89,8 @@ class RequestTest extends PHPUnit_TestCase
 			array(
 				'api_url' => 'api',
 				'authentication_type' => 'application',
-				'application_id' => 'user',
-				'application_psk' => 'psk'
+				'application_id' => 'application',
+				'application_psk' => 'apppsk'
 			)
 		);
 		self::$configs['application_default_account'] = new Config(
@@ -271,7 +271,7 @@ class RequestTest extends PHPUnit_TestCase
 
 		if ($should_be_cached)
 		{
-			// We now it will only be called once, because it is a memory cache
+			// We know it will only be called once, because it is a memory cache
 			// For FileCache it could be called zero times and for NoopCache it will be called
 			// twice
 			$cache_mock

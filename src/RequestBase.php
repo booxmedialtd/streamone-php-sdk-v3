@@ -108,6 +108,8 @@ abstract class RequestBase
 		{
 			$this->parameters['account'] = $account;
 		}
+		
+		// If a customer is set clear it, because account and customer are mutually exclusive
 		if (isset($this->parameters['customer']))
 		{
 			unset($this->parameters['customer']);
@@ -138,6 +140,8 @@ abstract class RequestBase
 		{
 			$this->parameters['account'] = implode(',', $accounts);
 		}
+
+		// If a customer is set clear it, because account and customer are mutually exclusive
 		if (isset($this->parameters['customer']))
 		{
 			unset($this->parameters['customer']);
@@ -167,6 +171,8 @@ abstract class RequestBase
 		{
 			$this->parameters['customer'] = $customer;
 		}
+
+		// If an account is set clear it, because account and customer are mutually exclusive
 		if (isset($this->parameters['account']))
 		{
 			unset($this->parameters['account']);

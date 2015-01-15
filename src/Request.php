@@ -70,7 +70,7 @@ class Request extends RequestBase
 		
 		$this->config = $config;
 
-		// Check if a default account is specified, and it is not overridden for this request
+		// Check if a default account is specified and set it as a parameter. Can later be overridden
 		if ($this->config->hasDefaultAccountId())
 		{
 			$this->parameters['account'] = $this->config->getDefaultAccountId();

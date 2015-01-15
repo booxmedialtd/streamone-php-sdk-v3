@@ -62,7 +62,7 @@ class PHPUnit_TestCase extends PHPUnit_Framework_TestCase
 		if (!(is_array($array) || ($array instanceof ArrayAccess)))
 		{
 			throw PHPUnit_Util_InvalidArgumentHelper::factory(
-				3, 'array or ArrayAccess'
+				2, 'array or ArrayAccess'
 			);
 		}
 

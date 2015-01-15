@@ -11,7 +11,7 @@ namespace StreamOne\API\v3;
  */
 class MemoryCache implements CacheInterface
 {
-	// Mmeory cache. Each element is index by the cache key and contains two values: age and value
+	// Memory cache. Each element is index by the cache key and contains two values: time and value
 	private $cache = array();
 
 	/**
@@ -40,7 +40,7 @@ class MemoryCache implements CacheInterface
 	{
 		if (isset($this->cache[$key]))
 		{
-			return time() - $this->cache[$key]['age'];
+			return time() - $this->cache[$key]['time'];
 		}
 
 		return false;
@@ -58,7 +58,7 @@ class MemoryCache implements CacheInterface
 	{
 		$this->cache[$key] = array(
 			'value' => $value,
-			'age' => time()
+			'time' => time()
 		);
 	}
 }
