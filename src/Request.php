@@ -96,16 +96,6 @@ class Request extends RequestBase
 	}
 
 	/**
-	 * Retrieve the configuration used for this request
-	 * 
-	 * @retval Config
-	 */
-	protected function getConfig()
-	{
-		return $this->config;
-	}
-
-	/**
 	 * Execute the prepared request
 	 *
 	 * This method will first check if there is a cached response for this request. If there is,
