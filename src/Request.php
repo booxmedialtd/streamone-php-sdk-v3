@@ -254,7 +254,7 @@ class Request extends RequestBase
 	 */
 	protected function cacheKey()
 	{
-		return $this->path() . '?' . http_build_query($this->parameters()) . '#' .
+		return 'request:' . $this->path() . '?' . http_build_query($this->parameters()) . '#' .
 			http_build_query($this->arguments());
 	}
 	
