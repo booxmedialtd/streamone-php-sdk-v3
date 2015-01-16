@@ -233,13 +233,20 @@ class Actor
 	{
 		$roles = $this->getRoles();
 		
+		// Depending on the active customer or account(s) and the roles the active user /
+		// application has, there are 3 possible ways to check whether the current actor has a token:
+		// [1] The roles do not provide enough information and more specific tokens should be
+		//     retrieved. See shouldCheckMyTokens() for more information when this is the case
+		// [2] There are no active account(s), check global or customer-specific tokens
+		// [3] There is at least one active account (but [1] does not hold, check account-specific
+		//     tokens
+		
 		if ($this->shouldCheckMyTokens($roles))
 		{
 			return $this->checkMyTokens($token);
 		}
 		elseif (!$this->hasAccounts())
 		{
-			
 			return $this->checkNonAccountHasToken($roles, $token);
 		}
 		else
