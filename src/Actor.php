@@ -19,6 +19,9 @@ class Actor
 
 	/// The session object to use for this Actor; null if not using a session
 	private $session;
+	
+	/// The cache to use for storing data about tokens and roles
+	private $token_cache;
 
 	/// The customer to use for this Actor
 	private $customer = null;
@@ -39,6 +42,15 @@ class Actor
 	{
 		$this->config = $config;
 		$this->session = $session;
+		
+		if ($this->session !== null && $this->config->getUseSessionForTokenCache())
+		{
+			$this->token_cache = new SessionCache($this->session);
+		}
+		else
+		{
+			$this->token_cache = $this->config->getTokenCache();
+		}
 
 		if ($config->getDefaultAccountId() !== null)
 		{
@@ -289,13 +301,19 @@ class Actor
 	 */
 	protected function getMyTokens()
 	{
-		// TODO: caching
-		
-		return $this->loadMyTokensFromApi();
+		$tokens = $this->loadMyTokensFromCache();
+		if ($tokens === false)
+		{
+			$tokens = $this->loadMyTokensFromApi();
+			$this->token_cache->set($this->tokensCacheKey(), $tokens);
+		}
+		return $tokens;
 	}
 	
 	/**
 	 * Load the tokens for the current actor from the API
+	 * 
+	 * This will also store the tokens in the cache
 	 * 
 	 * @retval array
 	 *   The tokens for the current actor
@@ -403,32 +421,41 @@ class Actor
 	 */
 	protected function getRoles()
 	{
-		// TODO: caching
-		
 		if ($this->session !== null || $this->config->getAuthenticationType() == Config::AUTH_USER)
 		{
-			$actor = 'user';
+			$actor_type = 'user';
 		}
 		else
 		{
-			$actor = 'application';
+			$actor_type = 'application';
 		}
-		return $this->loadRolesFromApi($actor);
+		
+		$roles = $this->loadRolesFromCache($actor_type);
+		
+		if ($roles === false)
+		{
+			$roles = $this->loadRolesFromApi($actor_type);
+			
+			// Store it in the cache
+			$this->token_cache->set($this->rolesCacheKey($actor_type), $roles);
+		}
+		
+		return $roles;
 	}
 	
 	/**
 	 * Load the roles of the current configuration and session from the API
 	 * 
-	 * @param string $actor
-	 *   Whether the roles of a user or application should be loaded
+	 * @param string $actor_type
+	 *   The actor type to load roles for; either "user" or "application"
 	 * @retval array
 	 *   The roles for the current configuration and session, loaded from the API
 	 * @throws RequestException
 	 *   If loading the roles from the API failed
 	 */
-	protected function loadRolesFromApi($actor)
+	protected function loadRolesFromApi($actor_type)
 	{
-		$request = $this->newRequest($actor, 'getmyroles');
+		$request = $this->newRequest($actor_type, 'getmyroles');
 		$request->execute();
 		
 		if (!$request->success())
@@ -474,6 +501,59 @@ class Actor
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Load the tokens for the current actor from the cache
+	 *
+	 * @retval array
+	 *   The tokens for the current actor, loaded from the cache. If the cache does not contain the
+	 *   roles false will be returned
+	 */
+	protected function loadMyTokensFromCache()
+	{
+		return $this->token_cache->get($this->tokensCacheKey());
+	}
+	
+	/**
+	 * Load the roles of the current configuration and session from the cache
+	 *
+	 * @param string $actor_type
+	 *   The actor type to load roles for; either "user" or "application"
+	 * @retval array|bool
+	 *   The roles for the current configuration and session, loaded from the cache. If the cache
+	 *   does not contain the roles false will be returned
+	 */
+	protected function loadRolesFromCache($actor_type)
+	{
+		return $this->token_cache->get($this->rolesCacheKey($actor_type));
+	}
+	
+	/**
+	 * Determine the key to use for caching roles
+	 *
+	 * @param string $actor_type
+	 *   The actor type to determine the cache key for; either "user" or "application"
+	 * @retval string
+	 *   A cache-key used for roles
+	 */
+	protected function rolesCacheKey($actor_type)
+	{
+		return 'roles:' . $actor_type . ':' .
+		       $this->config->getAuthenticationActorId();
+	}
+	
+	/**
+	 * Determine the key to use for caching tokens
+	 *
+	 * @retval string
+	 *   A cache-key used for tokens
+	 */
+	protected function tokensCacheKey()
+	{
+		return 'tokens:' . $this->config->getAuthenticationType() . ':' .
+		       $this->config->getAuthenticationActorId() . ':' . $this->customer . ':' .
+		       implode('|', $this->accounts);
 	}
 }
 

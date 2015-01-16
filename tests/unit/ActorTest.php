@@ -97,9 +97,9 @@ class TestActor extends Actor
 	/**
 	 * Return a predetermined set of roles
 	 */
-	protected function loadRolesFromApi($actor)
+	protected function loadRolesFromApi($actor_type)
 	{
-		if ($actor == 'user')
+		if ($actor_type == 'user')
 		{
 			return array(
 				array(
@@ -178,7 +178,8 @@ class TestActor extends Actor
 		sort($accounts);
 		
 		// Extra assumptions: A1 and A2 belong to C1 and A3 belongs to C2
-		if ($this->getConfig()->getAuthenticationType() == Config::AUTH_USER || $this->getSession() !== null)
+		if ($this->getConfig()->getAuthenticationType() == Config::AUTH_USER || 
+			$this->getSession() !== null)
 		{
 			if ($this->getCustomer() === null && $this->getAccount() === null)
 			{
@@ -250,8 +251,6 @@ class TestActor extends Actor
 				return array('z');
 			}
 		}
-		// Some unhandled case, return no tokens
-		return array();
 	}
 }
 
@@ -270,7 +269,8 @@ class ActorTest extends PHPUnit_TestCase
 				'api_url' => 'api',
 				'authentication_type' => 'user',
 				'user_id' => 'user',
-				'user_psk' => 'psk'
+				'user_psk' => 'psk',
+				'use_session_for_token_cache' => false
 			)
 		);
 		self::$configs['user_default_account'] = new Config(
@@ -279,7 +279,8 @@ class ActorTest extends PHPUnit_TestCase
 				'authentication_type' => 'user',
 				'user_id' => 'application',
 				'user_psk' => 'apppsk',
-				'default_account_id' => 'account'
+				'default_account_id' => 'account',
+				'use_session_for_token_cache' => false
 			)
 		);
 		self::$configs['application'] = new Config(
@@ -287,7 +288,8 @@ class ActorTest extends PHPUnit_TestCase
 				'api_url' => 'api',
 				'authentication_type' => 'application',
 				'application_id' => 'user',
-				'application_psk' => 'psk'
+				'application_psk' => 'psk',
+				'use_session_for_token_cache' => false
 			)
 		);
 		self::$configs['application_default_account'] = new Config(
@@ -296,7 +298,8 @@ class ActorTest extends PHPUnit_TestCase
 				'authentication_type' => 'application',
 				'application_id' => 'application',
 				'application_psk' => 'apppsk',
-				'default_account_id' => 'account'
+				'default_account_id' => 'account',
+				'use_session_for_token_cache' => false
 			)
 		);
 
@@ -1277,5 +1280,74 @@ class ActorTest extends PHPUnit_TestCase
 			array('application', array('A1', 'A2', 'A3'), 'a', true), // a is still global
 			array('application', array('A1', 'A2', 'A3'), 'q', false), // q does not exist
 		);
+	}
+	
+	/**
+	 * Test that roles are cached
+	 */
+	public function testTokenCacheRoles()
+	{
+		/** @var Config $config */
+		$config = self::$configs['user'];
+		
+		// Use a memory cache, so we know what happens
+		$config->setTokenCache(new \StreamOne\API\v3\MemoryCache);
+		
+		$actor = $this
+			->getMockBuilder('TestActor')
+			->setMethods(array('loadRolesFromApi'))
+			->setConstructorArgs(array($config))
+			->enableProxyingToOriginalMethods()
+			->getMock();
+		
+		$actor
+			->expects($this->once())
+			->method('loadRolesFromApi');
+		
+		/** @var TestActor $actor */
+		// Set no account, to be sure to not call loadMyTokensFromApi
+		$actor->setAccount(null);
+		
+		$actor->hasToken('a');
+		
+		// This second call should not trigger loadRolesFromApi
+		$actor->hasToken('a');
+		
+		$config->setTokenCache(new \StreamOne\API\v3\NoopCache);
+	}
+	
+	/**
+	 * Test that tokens are cached
+	 */
+	public function testTokenCacheTokens()
+	{
+		// We need an application configuration, because they have roles with customers
+		/** @var Config $config */
+		$config = self::$configs['application'];
+		
+		// Use a memory cache, so we know what happens
+		$config->setTokenCache(new \StreamOne\API\v3\MemoryCache);
+		
+		$actor = $this
+			->getMockBuilder('TestActor')
+			->setMethods(array('loadMyTokensFromApi'))
+			->setConstructorArgs(array($config))
+			->enableProxyingToOriginalMethods()
+			->getMock();
+		
+		$actor
+			->expects($this->once())
+			->method('loadMyTokensFromApi');
+		
+		/** @var TestActor $actor */
+		// Set an account, to be sure to call loadMyTokensFromApi
+		$actor->setAccount('A1');
+		
+		$actor->hasToken('a');
+		
+		// This second call should not trigger loadMyTokensFromApi
+		$actor->hasToken('a');
+		
+		$config->setTokenCache(new \StreamOne\API\v3\NoopCache);
 	}
 }
