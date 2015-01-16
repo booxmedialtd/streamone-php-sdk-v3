@@ -77,8 +77,8 @@ class ConfigTest extends PHPUnit_TestCase
 	{
 		$cache = new NoopCache;
 		$config = new Config(array(
-			                     'token_cache' => $cache
-		                     ));
+			'token_cache' => $cache
+		));
 		$this->assertSame($cache, $config->getTokenCache());
 	}
 	
