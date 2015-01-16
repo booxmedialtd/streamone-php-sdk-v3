@@ -22,45 +22,45 @@ class MySessionStore extends MemorySessionStore
 class ConfigTest extends PHPUnit_TestCase
 {
 	/**
-	 * Test the cache-option of the constructor with a CacheInterface object
+	 * Test the request_cache-option of the constructor with a CacheInterface object
 	 */
-	public function testConstructorCacheObject()
+	public function testConstructorRequestCacheObject()
 	{
 		$cache = new NoopCache;
 		$config = new Config(array(
-			'cache' => $cache
+			'request_cache' => $cache
 		));
-		$this->assertSame($cache, $config->getCache());
+		$this->assertSame($cache, $config->getRequestCache());
 	}
 	
 	/**
-	 * Test the cache-option of the constructor with a factory array
+	 * Test the request_cache-option of the constructor with a factory array
 	 */
-	public function testConstructorCacheArray()
+	public function testConstructorRequestCacheArray()
 	{
 		$config = new Config(array(
-			'cache' => array('NoopCache')
+			'request_cache' => array('NoopCache')
 		));
-		$this->assertTrue($config->getCache() instanceof NoopCache);
+		$this->assertTrue($config->getRequestCache() instanceof NoopCache);
 	}
 	
 	/**
-	 * Test the cache-option of the constructor with invalid values
+	 * Test the request_cache-option of the constructor with invalid values
 	 * 
 	 * @param mixed $value
 	 *   The (invalid) value to use for the cache option
 	 * 
-	 * @dataProvider provideConstructorCacheInvalid
+	 * @dataProvider provideConstructorRequestCacheInvalid
 	 * @expectedException InvalidArgumentException
 	 */
-	public function testConstructorCacheInvalid($value)
+	public function testConstructorRequestCacheInvalid($value)
 	{
 		$config = new Config(array(
-			'cache' => $value
+			'request_cache' => $value
 		));
 	}
 	
-	public function provideConstructorCacheInvalid()
+	public function provideConstructorRequestCacheInvalid()
 	{
 		return array(
 			array('strings are invalid'),
@@ -70,6 +70,7 @@ class ConfigTest extends PHPUnit_TestCase
 			array(new stdClass()), // Object does not implement CacheInterface
 		);
 	}
+	
 	/**
 	 * Test the token_cache-option of the constructor with a CacheInterface object
 	 */
@@ -110,6 +111,58 @@ class ConfigTest extends PHPUnit_TestCase
 	}
 	
 	public function provideConstructorTokenCacheInvalid()
+	{
+		return array(
+			array('strings are invalid'),
+			array(8),
+			array(true),
+			array(array()), // Array must contain arguments
+			array(new stdClass()), // Object does not implement CacheInterface
+		);
+	}
+	
+	/**
+	 * Test the cache-option of the constructor with a CacheInterface object
+	 */
+	public function testConstructorCacheObject()
+	{
+		$cache = new NoopCache;
+		$config = new Config(array(
+			 'cache' => $cache
+		));
+		$this->assertSame($cache, $config->getRequestCache());
+		$this->assertSame($cache, $config->getTokenCache());
+	}
+	
+	/**
+	 * Test the cache-option of the constructor with a factory array
+	 */
+	public function testConstructorCacheArray()
+	{
+		$config = new Config(array(
+			'cache' => array('NoopCache')
+		));
+		$this->assertTrue($config->getRequestCache() instanceof NoopCache);
+		$this->assertTrue($config->getTokenCache() instanceof NoopCache);
+	}
+	
+	/**
+	 * Test the cache-option of the constructor with invalid values
+	 *
+	 * @param mixed $value
+	 *   The (invalid) value to use for the cache option
+	 *
+	 * @dataProvider provideConstructorCacheInvalid
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructorCacheInvalid($value)
+	{
+		$config = new Config(array(
+			'cache' => $value
+		));
+	}
+	
+	public function provideConstructorCacheInvalid()
 	{
 		return array(
 			array('strings are invalid'),

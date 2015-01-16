@@ -258,8 +258,18 @@ class Actor
 	/**
 	 * Check whether the api/myroles action should be used to check for tokens
 	 * 
-	 * This is only the if this actor is for at least one account and the actor has rights in at
-	 * least one customer
+	 * There might not be enough information yet in the list of roles for the current application or
+	 * user to determine the tokens for this actor. This method detects in which cases a more
+	 * specific list of tokens needs to be requested.
+	 * 
+	 * The main issue is that there is no mapping between accounts and customers. Consider a user
+	 * that has a role in a specific account and an actor wants to do a request in an account.
+	 * We then have no way to know if that account belongs to the customer, which we need to know
+	 * to be able to get the tokens of that account (as these should include any tokens for the
+	 * customer of that account). To remedy this, we can request the active tokens specifc for this
+	 * case.
+	 * 
+	 * This method is used to detect this case.
 	 * 
 	 * @param array $roles
 	 *   The roles as returned from the getmyroles API actions
@@ -282,7 +292,9 @@ class Actor
 	}
 	
 	/**
-	 * Use the "mytokens" to check if the current actor has the given token
+	 * Use the tokens of the current actor to check if the current actor has the given token
+	 * 
+	 * This might request the tokens of the current actor from the API, if not cached
 	 * 
 	 * @param string $token
 	 *   The token to check for
@@ -318,6 +330,31 @@ class Actor
 	}
 	
 	/**
+	 * Load the tokens for the current actor from the cache
+	 *
+	 * @retval array
+	 *   The tokens for the current actor, loaded from the cache. If the cache does not contain the
+	 *   roles false will be returned
+	 */
+	protected function loadMyTokensFromCache()
+	{
+		return $this->token_cache->get($this->tokensCacheKey());
+	}
+	
+	/**
+	 * Determine the key to use for caching tokens
+	 *
+	 * @retval string
+	 *   A cache-key used for tokens
+	 */
+	protected function tokensCacheKey()
+	{
+		return 'tokens:' . $this->config->getAuthenticationType() . ':' .
+		       $this->config->getAuthenticationActorId() . ':' . $this->customer . ':' .
+		       implode('|', $this->accounts);
+	}
+	
+	/**
 	 * Load the tokens for the current actor from the API
 	 * 
 	 * This will also store the tokens in the cache
@@ -342,9 +379,9 @@ class Actor
 	
 	/**
 	 * Check if an actor not having an account has a given token
-	 * 
-	 * This function should be caeed if hasAccounts() returns false and shouldCheckMyTokens() also
-	 * returns false
+	 *
+	 * This function checks whether the token is available for an actor having a customer or a
+	 * global actor
 	 *
 	 * @param array $roles
 	 *   The roles as returned from the getmyroles API actions
@@ -358,7 +395,7 @@ class Actor
 	{
 		foreach ($roles as $role)
 		{
-			if ($this->checkRoleForToken($role, $token))
+			if ($this->checkRoleForToken($role, $token, $this->customer, null))
 			{
 				return true;
 			}
@@ -368,9 +405,8 @@ class Actor
 	
 	/**
 	 * Check if an actor having at least one account has a given token
-	 * 
-	 * This function should be called if hasAccounts() returns true and shouldCheckMyTokens()
-	 * returns false
+	 *
+	 * This function checks whether the token is available for all customers of the current actor
 	 *
 	 * @param array $roles
 	 *   The roles as returned from the getmyroles API actions
@@ -387,7 +423,7 @@ class Actor
 		{
 			foreach ($roles as $role)
 			{
-				if ($this->checkRoleForToken($role, $token, $account))
+				if ($this->checkRoleForToken($role, $token, null, $account))
 				{
 					$num_ok++;
 					break;
@@ -398,23 +434,23 @@ class Actor
 	}
 	
 	/**
-	 * Check if a given role has a specific token
-	 * 
-	 * It will always use the customer of this actor, but the account can be specified
+	 * Check if a given role has a specific token in an account or customer
 	 *
 	 * @param array $role
 	 *   The role as returned from the getmyroles API actions
 	 * @param string $token
 	 *   The token to check
+	 * @param string|null $customer
+	 *   The customer to use for checking
 	 * @param string|null $account
 	 *   The account to use for checking
 	 * @retval bool
 	 *   True if and only if the given role has the given token and is a super-role if the given
 	 *   customer and account
 	 */
-	protected function checkRoleForToken($role, $token, $account = null)
+	protected function checkRoleForToken($role, $token, $customer, $account)
 	{
-		return ($this->roleIsSuperOf($role, $this->customer, $account) &&
+		return ($this->roleIsSuperOf($role, $customer, $account) &&
 			in_array($token, $role['role']['tokens']));
 	}
 	
@@ -451,6 +487,34 @@ class Actor
 	}
 	
 	/**
+	 * Load the roles of the current configuration and session from the cache
+	 *
+	 * @param string $actor_type
+	 *   The actor type to load roles for; either "user" or "application"
+	 * @retval array|bool
+	 *   The roles for the current configuration and session, loaded from the cache. If the cache
+	 *   does not contain the roles false will be returned
+	 */
+	protected function loadRolesFromCache($actor_type)
+	{
+		return $this->token_cache->get($this->rolesCacheKey($actor_type));
+	}
+	
+	/**
+	 * Determine the key to use for caching roles
+	 *
+	 * @param string $actor_type
+	 *   The actor type to determine the cache key for; either "user" or "application"
+	 * @retval string
+	 *   A cache-key used for roles
+	 */
+	protected function rolesCacheKey($actor_type)
+	{
+		return 'roles:' . $actor_type . ':' .
+		       $this->config->getAuthenticationActorId();
+	}
+	
+	/**
 	 * Load the roles of the current configuration and session from the API
 	 * 
 	 * @param string $actor_type
@@ -481,6 +545,12 @@ class Actor
 	 * - It is a role with a customer (and without an account) and the customer matches the given argument
 	 * - It is a role with an account and the account matches the given argument
 	 * 
+	 * Note that there is a fourth case: if it is a role with a customer, an account is given in the
+	 * arguments and that account belongs to the customer. This case is not handled here, as finding
+	 * out if an account belongs to a customer can not be done.
+	 * 
+	 * @see shouldCheckMyTokens
+	 * 
 	 * @param array $role
 	 *   The role as returned from the getmyroles API actions
 	 * @param string|null $customer
@@ -490,7 +560,7 @@ class Actor
 	 * @retval bool
 	 *   True if and only if the given role is a super-role of the given arguments
 	 */
-	protected function roleIsSuperOf($role, $customer, $account = null)
+	protected function roleIsSuperOf($role, $customer, $account)
 	{
 		if (!isset($role['customer']) && !isset($role['account']))
 		{
@@ -508,59 +578,6 @@ class Actor
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Load the tokens for the current actor from the cache
-	 *
-	 * @retval array
-	 *   The tokens for the current actor, loaded from the cache. If the cache does not contain the
-	 *   roles false will be returned
-	 */
-	protected function loadMyTokensFromCache()
-	{
-		return $this->token_cache->get($this->tokensCacheKey());
-	}
-	
-	/**
-	 * Load the roles of the current configuration and session from the cache
-	 *
-	 * @param string $actor_type
-	 *   The actor type to load roles for; either "user" or "application"
-	 * @retval array|bool
-	 *   The roles for the current configuration and session, loaded from the cache. If the cache
-	 *   does not contain the roles false will be returned
-	 */
-	protected function loadRolesFromCache($actor_type)
-	{
-		return $this->token_cache->get($this->rolesCacheKey($actor_type));
-	}
-	
-	/**
-	 * Determine the key to use for caching roles
-	 *
-	 * @param string $actor_type
-	 *   The actor type to determine the cache key for; either "user" or "application"
-	 * @retval string
-	 *   A cache-key used for roles
-	 */
-	protected function rolesCacheKey($actor_type)
-	{
-		return 'roles:' . $actor_type . ':' .
-		       $this->config->getAuthenticationActorId();
-	}
-	
-	/**
-	 * Determine the key to use for caching tokens
-	 *
-	 * @retval string
-	 *   A cache-key used for tokens
-	 */
-	protected function tokensCacheKey()
-	{
-		return 'tokens:' . $this->config->getAuthenticationType() . ':' .
-		       $this->config->getAuthenticationActorId() . ':' . $this->customer . ':' .
-		       implode('|', $this->accounts);
 	}
 }
 

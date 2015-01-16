@@ -40,8 +40,8 @@ class Config
 	/// Array of status codes to show a very visible error for
 	private $visible_errors = array(2,3,4,5,7);
 	
-	/// Caching object to use; must implement CacheInterface
-	private $cache = null;
+	/// Caching object to use for requests; must implement CacheInterface
+	private $request_cache = null;
 	
 	/// Caching object to use for roles and tokens; must implement CacheInterface
 	private $token_cache = null;
@@ -80,11 +80,17 @@ class Config
 	 *                       - see setDefaultAccountId()
 	 * - visible_errors: an array of status codes that result in a very visible error bar
 	 *                   - see setVisibleErrors()
-	 * - cache: caching object to use, implementing CacheInterface, or an array with the correct
-	 *          arguments to constructCache() to create one
-	 *          - see setCache() and constructCache()
+	 * - cache:         caching object to use for both requests and tokens and roles, implementing
+	 *                  CacheInterface, or an array with the correct arguments to constructCache()
+	 *                  to create one
+	 *                  - see setCache() and constructCache()
+	 * - request_cache: caching object to use for requests, implementing CacheInterface, or an
+	 *                  array with the correct arguments to constructCache() to create one. This
+	 *                  will overwrite any cache set with the 'cache' option
+	 *                  - see setRequestCache() and constructCache()
 	 * - token_cache: tokens and roles caching object to use, implementing CacheInterface, or an
-	 *                array with the correct arguments to constructCache() to create one
+	 *                array with the correct arguments to constructCache() to create one. This
+	 *                  will overwrite any cache set with the 'cache' option
 	 *                - see setTokenCache() and constructCache()
 	 * - use_session_for_token_cache: whether to use the session to store tokens and roles if using
 	 *                                a session. If false, the cache object returned by
@@ -108,7 +114,7 @@ class Config
 	public function __construct(array $options)
 	{
 		// Instantiate default cache and session store
-		$this->cache = new NoopCache;
+		$this->request_cache = new NoopCache;
 		$this->session_store = new PhpSessionStore;
 		$this->token_cache = new NoopCache;
 		
@@ -164,6 +170,11 @@ class Config
 				'class' => 'StreamOne\\API\\v3\\CacheInterface',
 				'factory' => 'constructCache',
 				'setter' => 'setCache',
+			),
+			'request_cache' => array(
+				'class' => 'StreamOne\\API\\v3\\CacheInterface',
+				'factory' => 'constructCache',
+				'setter' => 'setRequestCache',
 			),
 			'token_cache' => array(
 				'class' => 'StreamOne\\API\\v3\\CacheInterface',
@@ -499,9 +510,30 @@ class Config
 		return in_array($status, $this->getVisibleErrors());
 	}
 	
+	/**
+	 * Set the caching object to use for both requests and tokens and roles
+	 *
+	 * The caching object will be used by the Request class to cache requests when appropiate and by
+	 * the Actor class to cache tokens and roles.
+	 * Any caching object used must implement the CacheInterface.
+	 *
+	 * The SDK provides the following caching classes:
+	 * - NoopCache, which will not cache anything (default)
+	 * - FileCache, which will cache to files on disk
+	 * - MemCache, which will cache on a memcached server
+	 * - MemoryCache, which will cache in memory
+	 *
+	 * @param CacheInterface $cache
+	 *   The caching object to use
+	 */
+	public function setCache(CacheInterface $cache)
+	{
+		$this->request_cache = $cache;
+		$this->token_cache = $cache;
+	}
 	
 	/**
-	 * Set the caching object to use
+	 * Set the caching object to use for requests
 	 * 
 	 * The caching object will be used by the Request class to cache requests when appropiate.
 	 * Any caching object used must implement the CacheInterface.
@@ -510,25 +542,25 @@ class Config
 	 * - NoopCache, which will not cache anything (default)
 	 * - FileCache, which will cache to files on disk
 	 * - MemCache, which will cache on a memcached server
-	 * - MemoryCache, which will cache in mmeory
+	 * - MemoryCache, which will cache in memory
 	 * 
 	 * @param CacheInterface $cache
 	 *   The caching object to use
 	 */
-	public function setCache(CacheInterface $cache)
+	public function setRequestCache(CacheInterface $cache)
 	{
-		$this->cache = $cache;
+		$this->request_cache = $cache;
 	}
 	
 	/**
-	 * Get the caching object used
+	 * Get the caching object used for requests
 	 * 
 	 * @retval CacheInterface
 	 *   The caching object used
 	 */
-	public function getCache()
+	public function getRequestCache()
 	{
-		return $this->cache;
+		return $this->request_cache;
 	}
 	
 	/**
@@ -541,7 +573,7 @@ class Config
 	 * - NoopCache, which will not cache anything (default)
 	 * - FileCache, which will cache to files on disk
 	 * - MemCache, which will cache on a memcached server
-	 * - MemoryCache, which will cache in mmeory
+	 * - MemoryCache, which will cache in memory
 	 *
 	 * @param CacheInterface $token_cache
 	 *   The caching object to use

@@ -6,8 +6,7 @@ namespace StreamOne\API\v3;
  * Exception thrown if an error occurred while communicating with the API.
  *
  * This exception should be thrown when code cannot be executed because communication with the
- * API failed. It is not (currently) thrown from Request itself, but must be
- * thrown from code using that class.
+ * API failed. It is not thrown from Request itself, but must be thrown from code using that class.
  */
 class RequestException extends \RuntimeException
 {

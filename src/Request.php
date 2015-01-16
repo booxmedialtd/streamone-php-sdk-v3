@@ -267,7 +267,7 @@ class Request extends RequestBase
 	protected function retrieveCache()
 	{
 		// Retrieve cache object from config
-		$cache = $this->config->getCache();
+		$cache = $this->config->getRequestCache();
 		
 		// Check for response from cache
 		$response = $cache->get($this->cacheKey());
@@ -294,7 +294,7 @@ class Request extends RequestBase
 	{
 		if ($this->cacheable() && !$this->from_cache)
 		{
-			$cache = $this->config->getCache();
+			$cache = $this->config->getRequestCache();
 			$cache->set($this->cacheKey(), $this->plainResponse());
 		}
 	}
