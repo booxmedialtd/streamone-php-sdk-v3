@@ -90,6 +90,172 @@ class TestActorRequest extends Request
 }
 
 /**
+ * Class to overwrite functions that get data from the API
+ */
+class TestActor extends Actor
+{
+	/**
+	 * Return a predetermined set of roles
+	 */
+	protected function loadRolesFromApi($actor)
+	{
+		if ($actor == 'user')
+		{
+			return array(
+				array(
+					// user has tokens a, b, c global
+					'role' => array(
+						'tokens' => array('a', 'b', 'c')
+					),
+				),
+				array(
+					// it has tokens f, g in account A1
+					'role' => array(
+						'tokens' => array('f', 'g')
+					),
+					'account' => array('id' => 'A1')
+				),
+				array(
+					// and it has tokens g, h in account A2
+					'role' => array(
+						'tokens' => array('g', 'h')
+					),
+					'account' => array('id' => 'A2')
+				)
+			);
+		}
+		else
+		{
+			return array(
+				array(
+					// application has token z global
+					'role' => array(
+						'tokens' => array('z')
+					),
+				),
+				array(
+					// it has tokens y, p in customer C1
+					'role' => array(
+						'tokens' => array('y', 'p')
+					),
+					'customer' => array('id' => 'C1')
+				),
+				array(
+					// it has tokens x, p in customer C2
+					'role' => array(
+						'tokens' => array('x', 'p')
+					),
+					'customer' => array('id' => 'C2')
+				),
+				array(
+					// it has tokens w, v in account A1
+					'role' => array(
+						'tokens' => array('w', 'v')
+					),
+					'account' => array('id' => 'A1')
+				),
+				array(
+					// and it has tokens v, u in account A3
+					'role' => array(
+						'tokens' => array('v', 'u')
+					),
+					'account' => array('id' => 'A3')
+				)
+			);
+		}
+	}
+	
+	/**
+	 * Return a predetermined set of tokens
+	 */
+	protected function loadMyTokensFromApi()
+	{
+		// This should be consistent with the above list, otherwise we might get unexpected behaviour
+		// That makes this function a big if-statement
+		
+		// Sort accounts so we can do array comparison easily
+		$accounts = $this->getAccounts();
+		sort($accounts);
+		
+		// Extra assumptions: A1 and A2 belong to C1 and A3 belongs to C2
+		if ($this->getConfig()->getAuthenticationType() == Config::AUTH_USER || $this->getSession() !== null)
+		{
+			if ($this->getCustomer() === null && $this->getAccount() === null)
+			{
+				return array('a', 'b', 'c');
+			}
+			elseif ($accounts == array('A1'))
+			{
+				return array('a', 'b', 'c', 'f', 'g');
+			}
+			elseif ($accounts == array('A2'))
+			{
+				return array('a', 'b', 'c', 'g', 'h');
+			}
+			elseif ($accounts == array('A1', 'A2'))
+			{
+				return array('a', 'b', 'c', 'g');
+			}
+			else
+			{
+				// Globally available tokens
+				return array('a', 'b', 'c');
+			}
+		}
+		else
+		{
+			if ($this->getCustomer() === null && $this->getAccount() === null)
+			{
+				return array('z');
+			}
+			elseif ($this->getCustomer() === 'C1')
+			{
+				return array('z', 'y', 'p');
+			}
+			elseif ($this->getCustomer() === 'C2')
+			{
+				return array('z', 'x', 'p');
+			}
+			elseif ($accounts == array('A1'))
+			{
+				return array('z', 'y', 'p', 'w', 'v');
+			}
+			elseif ($accounts == array('A3'))
+			{
+				return array('z', 'y', 'p');
+			}
+			elseif ($accounts == array('A3'))
+			{
+				return array('z', 'x', 'p', 'v', 'u');
+			}
+			elseif ($accounts == array('A1', 'A2'))
+			{
+				return array('z', 'p', 'y');
+			}
+			elseif ($accounts == array('A1', 'A3'))
+			{
+				return array('z', 'p', 'v');
+			}
+			elseif ($accounts == array('A2', 'A3'))
+			{
+				return array('z', 'p');
+			}
+			elseif ($accounts == array('A1', 'A2', 'A3'))
+			{
+				return array('z', 'p');
+			}
+			else
+			{
+				// Globally available tokens
+				return array('z');
+			}
+		}
+		// Some unhandled case, return no tokens
+		return array();
+	}
+}
+
+/**
  * Test for the Actor class
  */
 class ActorTest extends PHPUnit_TestCase
@@ -793,6 +959,323 @@ class ActorTest extends PHPUnit_TestCase
 		return array(
 			array('user'),
 			array('user_default_account'),
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors without an account
+	 * or customer
+	 * 
+	 * @param string $config
+	 *   The config to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 * 
+	 * @dataProvider provideHasTokenGlobal
+	 */
+	public function testHasTokenGlobal($config, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$actor = new TestActor($config_to_use);
+		// We set the account to null to remove any default account if set
+		$actor->setAccount(null);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenGlobal()
+	{
+		return array(
+			array('user', 'a', true),
+			array('user', 'b', true),
+			array('user_default_account', 'b', true),
+			array('user', 'd', false),
+			array('user_default_account', 'e', false),
+			array('user', 's', false),
+			array('user', 'z', false),
+			array('application', 'z', true),
+			array('application', 'y', false),
+			array('application', 't', false),
+			array('application', 'a', false),
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors without an account
+	 * or customer in a session
+	 *
+	 * @param string $config
+	 *   The config and session to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenGlobalInSession
+	 */
+	public function testHasTokenGlobalInSession($config, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$session = self::$sessions[$config];
+		$actor = new TestActor($config_to_use, $session);
+		// We set the account to null to remove any default account if set
+		$actor->setAccount(null);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenGlobalInSession()
+	{
+		// The same tests as for the user* tests from the previous one, but then with application*,
+		// as these should now be for the user 
+		return array(
+			array('application', 'a', true),
+			array('application', 'b', true),
+			array('application_default_account', 'b', true),
+			array('application', 'd', false),
+			array('application_default_account', 'e', false),
+			array('application', 's', false),
+			array('application', 'z', false),
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with an account
+	 *
+	 * @param string $config
+	 *   The config to use
+	 * @param string $account
+	 *   The account to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenAccount
+	 */
+	public function testHasTokenAccount($config, $account, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$actor = new TestActor($config_to_use);
+		// We set the account to null to remove any default account if set
+		$actor->setAccount($account);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenAccount()
+	{
+		return array(
+			array('user', 'A1', 'a', true), // globally, should be OK
+			array('user', 'A1', 'f', true), // directly from A1
+			array('user', 'A1', 'g', true), // directly from A1
+			array('user', 'A1', 'h', false), // h is on A2
+			array('user', 'A2', 'h', true), // directly from A2
+			array('user', 'A1', 't', false), // unknown token
+			array('user', 'A3', 'a', true), // globally
+			array('user', 'A4', 'q', false), // unknown token
+			// Default account does not matter here anymore, already tested default account stuff
+		    array('application', 'A1', 'a', false), // a is for users, not apps
+			array('application', 'A1', 'z', true), // globally
+			array('application', 'A1', 'w', true), // from A1
+			array('application', 'A1', 'p', true), // from C1
+			array('application', 'A1', 'y', true), // from C1
+			array('application', 'A1', 'x', false), // from C2, so not A1
+			array('application', 'A5', 'z', true), // globally
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with an account in a
+	 * session
+	 *
+	 * @param string $config
+	 *   The config and session to use
+	 * @param string $account
+	 *   The account to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenAccountInSession
+	 */
+	public function testHasTokenAccountInSession($config, $account, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$session = self::$sessions[$config];
+		$actor = new TestActor($config_to_use, $session);
+		// We set the account to null to remove any default account if set
+		$actor->setAccount($account);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenAccountInSession()
+	{
+		return array(
+			// The same tests as for the user* tests from the previous one, but then with application*,
+			// as these should now be for the user 
+			array('application', 'A1', 'a', true), // globally, should be OK
+			array('application', 'A1', 'f', true), // directly from A1
+			array('application', 'A1', 'g', true), // directly from A1
+			array('application', 'A1', 'h', false), // h is on A2
+			array('application', 'A2', 'h', true), // directly from A2
+			array('application', 'A1', 't', false), // unknown token
+			array('application', 'A3', 'a', true), // globally
+			array('application', 'A4', 'q', false), // unknown token
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with a customer
+	 *
+	 * @param string $config
+	 *   The config to use
+	 * @param string $customer
+	 *   The customer to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenCustomer
+	 */
+	public function testHasTokenCustomer($config, $customer, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$actor = new TestActor($config_to_use);
+		// We set the account to null to remove any default account if set
+		$actor->setCustomer($customer);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenCustomer()
+	{
+		return array(
+			array('user', 'C1', 'a', true), // global
+			array('user', 'C5', 'a', true), // global, even though customer has nothing itself
+			array('user', 'C1', 'f', false), // in A1, not C1
+			array('user', 'C1', 'q', false), // unknown token
+			array('application', 'C1', 'z', true), // global
+			array('application', 'C1', 'y', true), // in C1
+			array('application', 'C1', 'p', true), // in C1
+			array('application', 'C1', 'x', false), // in C2, not C1
+			array('application', 'C1', 'w', false), // in A1, not C1
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with a customer in a
+	 * session
+	 *
+	 * @param string $config
+	 *   The config and session to use
+	 * @param string $customer
+	 *   The customer to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenCustomerInSession
+	 */
+	public function testHasTokenCustomerInSession($config, $customer, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$session = self::$sessions[$config];
+		$actor = new TestActor($config_to_use, $session);
+		// We set the account to null to remove any default account if set
+		$actor->setCustomer($customer);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenCustomerInSession()
+	{
+		return array(
+			// The same tests as for the user* tests from the previous one, but then with application*,
+			// as these should now be for the user
+			array('application', 'C1', 'a', true), // global
+			array('application', 'C5', 'a', true), // global, even though customer has nothing itself
+			array('application', 'C1', 'f', false), // in A1, not C1
+			array('application', 'C1', 'q', false), // unknown token
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with multiple accounts
+	 *
+	 * @param string $config
+	 *   The config to use
+	 * @param array $accounts
+	 *   The accounts to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenAccounts
+	 */
+	public function testHasTokenAccounts($config, $accounts, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$actor = new TestActor($config_to_use);
+		// We set the account to null to remove any default account if set
+		$actor->setAccounts($accounts);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenAccounts()
+	{
+		return array(
+			array('user', array('A1', 'A2'), 'g', true), // g is shared between both accounts
+			array('user', array('A1', 'A2'), 'f', false), // f is only in A1
+			array('user', array('A1', 'A2'), 'h', false), // h is only in A2
+			array('user', array('A1', 'A2'), 'a', true), // a is global
+			array('user', array('A1', 'A2', 'A3'), 'g', false), // A3 does not have any tokens
+			array('user', array('A1', 'A2', 'A3'), 'a', true), // a is still global
+			array('user', array('A1', 'A2', 'A3'), 'q', false), // q does not exist
+			array('application', array('A1', 'A2', 'A3'), 'z', true), // z is global
+			array('application', array('A1', 'A2', 'A3'), 'p', true), // p is shared between both customers
+			array('application', array('A1', 'A3'), 'v', true), // v is shared between both accounts
+			array('application', array('A1', 'A3'), 'w', false), // w is only in A1
+			array('application', array('A1', 'A2', 'A3'), 'v', false), // v is only in A1 and A3
+		);
+	}
+	
+	/**
+	 * Test that checking if an actor has a token works as expected for actors with multiple accounts
+	 * in a session
+	 *
+	 * @param string $config
+	 *   The config and session to use
+	 * @param array $accounts
+	 *   The accounts to use
+	 * @param string $token
+	 *   The token to check for
+	 * @param bool $has_token
+	 *   Whether this actor should have that token
+	 *
+	 * @dataProvider provideHasTokenAccountsInSession
+	 */
+	public function testHasTokenAccountsInSession($config, $accounts, $token, $has_token)
+	{
+		$config_to_use = self::$configs[$config];
+		$session = self::$sessions[$config];
+		$actor = new TestActor($config_to_use, $session);
+		// We set the account to null to remove any default account if set
+		$actor->setAccounts($accounts);
+		$this->assertSame($has_token, $actor->hasToken($token));
+	}
+	
+	public function provideHasTokenAccountsInSession()
+	{
+		return array(
+			array('application', array('A1', 'A2'), 'g', true), // g is shared between both accounts
+			array('application', array('A1', 'A2'), 'f', false), // f is only in A1
+			array('application', array('A1', 'A2'), 'h', false), // h is only in A2
+			array('application', array('A1', 'A2'), 'a', true), // a is global
+			array('application', array('A1', 'A2', 'A3'), 'g', false), // A3 does not have any tokens
+			array('application', array('A1', 'A2', 'A3'), 'a', true), // a is still global
+			array('application', array('A1', 'A2', 'A3'), 'q', false), // q does not exist
 		);
 	}
 }
