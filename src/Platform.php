@@ -101,3 +101,7 @@ class Platform
 		return new Actor($this->config, $session);
 	}
 }
+
+/**
+ * @}
+ */
