@@ -62,7 +62,7 @@ class PersistentActor extends Actor {
 	 *
 	 * Will also persist the accounts in the current session
 	 */
-	public function setAccounts($accounts)
+	public function setAccounts(array $accounts)
 	{
 		parent::setAccounts($accounts);
 		$this->persistToSession();
