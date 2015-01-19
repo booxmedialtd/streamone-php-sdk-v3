@@ -11,7 +11,10 @@ namespace StreamOne\API\v3;
  */
 class MemoryCache implements CacheInterface
 {
-	// Memory cache. Each element is index by the cache key and contains two values: time and value
+	/**
+	 * @var array $cache
+	 *   Memory cache. Each element is index by the cache key and contains two values: time and value
+	 */
 	private $cache = array();
 
 	/**

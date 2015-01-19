@@ -63,7 +63,7 @@ class TestActorRequest extends Request
 	/**
 	 * We need the authentication type in tests, so make it publicly available
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The authentication type used
 	 */
 	public function getAuthenticationType()

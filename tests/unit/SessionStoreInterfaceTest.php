@@ -8,7 +8,7 @@ abstract class SessionStoreInterfaceTest extends PHPUnit_Framework_TestCase
 	/**
 	 * Construct an (empty) session store to test
 	 * 
-	 * @retval StreamOneSessionStoreInterface
+	 * @return StreamOneSessionStoreInterface
 	 *   An instantiated session store to run the tests on
 	 */
 	abstract protected function constructSessionStore();

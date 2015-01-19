@@ -22,35 +22,65 @@ class Config
 	/// Application authentication type
 	const AUTH_APPLICATION = 'application';
 	
-	/// API URL
+	/**
+	 * @var string $api_url
+	 *   API URL
+	 */
 	private $api_url = "http://api.streamoneonecloud.net";
 	
-	/// Authentication type
+	/**
+	 * @var string $authentication_type
+	 *   Authentication type
+	 */
 	private $authentication_type = self::AUTH_UNKNOWN;
 	
-	/// Actor ID for authentication
+	/**
+	 * @var string $auth_actor_id
+	 *   Actor ID for authentication
+	 */
 	private $auth_actor_id = '';
 	
-	/// Actor pre-shared key for authentication
+	/**
+	 * @var string $auth_actor_psk
+	 *   Actor pre-shared key for authentication
+	 */
 	private $auth_actor_psk = '';
 	
-	/// Default account id
+	/**
+	 * @var string|null $default_account_id
+	 *   Default account ID
+	 */
 	private $default_account_id = null;
 	
-	/// Array of status codes to show a very visible error for
+	/**
+	 * @var array $visible_errors
+	 *   Array of status codes to show a very visible error for
+	 */
 	private $visible_errors = array(2,3,4,5,7);
 	
-	/// Caching object to use for requests; must implement CacheInterface
+	/**
+	 * @var CacheInterface $request_cache
+	 *   Caching object to use for requests; must implement CacheInterface
+	 */
 	private $request_cache = null;
 	
-	/// Caching object to use for roles and tokens; must implement CacheInterface
+	/**
+	 * @var CacheInterface $token_cache
+	 *   Caching object to use for roles and tokens; must implement CacheInterface
+	 */
 	private $token_cache = null;
 	
-	/// Whether to use the session for roles and tokens cache if using a session. If true, the above
-	/// cache will never be used and can thus be null
+	/**
+	 * @var bool $use_session_for_token_cache
+	 *   Whether to use the session for roles and tokens cache if using a session. If true, the
+	 *   above cache will never be used and can thus be null
+	 */
 	private $use_session_for_token_cache = true;
 	
-	/// Default session store to use; must implement SessionStoreInterface
+	/**
+	 * @var SessionStoreInterface $session_store
+	 *   Default session store to use; must implement SessionStoreInterface
+	 */
 	private $session_store = null;
 	
 	
@@ -230,7 +260,7 @@ class Config
 	 * 
 	 * @param string $name
 	 *   Name of the class to resolve
-	 * @retval ReflectionClass
+	 * @return \ReflectionClass
 	 *   A ReflectionClass instance for the given class name
 	 * 
 	 * @throws \InvalidArgumentException
@@ -264,7 +294,7 @@ class Config
 	 *   class must implement CacheInterface.
 	 * @param mixed $name,...
 	 *   Constructor arguments for the specified cache
-	 * @retval CacheInterface
+	 * @return CacheInterface
 	 *   The constructed cache
 	 * 
 	 * @throws \InvalidArgumentException
@@ -298,7 +328,7 @@ class Config
 	 *   that order. The referenced class must implement SessionStoreInterface.
 	 * @param mixed $name,...
 	 *   Constructor arguments for the specified session store
-	 * @retval SessionStoreInterface
+	 * @return SessionStoreInterface
 	 *   The constructed session store
 	 * 
 	 * @throws \InvalidArgumentException
@@ -344,7 +374,7 @@ class Config
 	 * 
 	 * @see setApiUrl()
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The API URL to use
 	 */
 	public function getApiUrl()
@@ -386,7 +416,7 @@ class Config
 	/**
 	 * Get the currently enabled authentication type
 	 * 
-	 * @retval mixed
+	 * @return mixed
 	 *   One of the following values:
 	 *   - Config::AUTH_UNKNOWN if no authentication type is configured
 	 *   - Config::AUTH_USER if user authentication is enabled
@@ -404,7 +434,7 @@ class Config
 	 * 
 	 * When application authentication is enabled, this returns the application ID to use.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The actor ID to use for authentication
 	 */
 	public function getAuthenticationActorId()
@@ -419,7 +449,7 @@ class Config
 	 * 
 	 * When application authentication is enabled, this returns the application PSK to use.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The actor pre-shared key to use for authentication
 	 */
 	public function getAuthenticationActorKey()
@@ -446,7 +476,7 @@ class Config
 	/**
 	 * Get the default account ID to use for API requests
 	 * 
-	 * @retval string
+	 * @return string
 	 *   Default account ID for API requests; null if not enabled
 	 */
 	public function getDefaultAccountId()
@@ -457,7 +487,7 @@ class Config
 	/**
 	 * Check if a default account ID is specified
 	 * 
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if a default account ID is specified
 	 */
 	public function hasDefaultAccountId()
@@ -489,7 +519,7 @@ class Config
 	/**
 	 * Get the status codes which will result in large visible errors when received
 	 * 
-	 * @retval array
+	 * @return array
 	 *   The status codes to display visible errors for
 	 */
 	public function getVisibleErrors()
@@ -502,7 +532,7 @@ class Config
 	 * 
 	 * @param int $status
 	 *   The status code to check
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the given status code should produce a visible error
 	 */
 	public function isVisibleError($status)
@@ -555,7 +585,7 @@ class Config
 	/**
 	 * Get the caching object used for requests
 	 * 
-	 * @retval CacheInterface
+	 * @return CacheInterface
 	 *   The caching object used
 	 */
 	public function getRequestCache()
@@ -586,7 +616,7 @@ class Config
 	/**
 	 * Get the caching object used for tokens and roles
 	 *
-	 * @retval CacheInterface
+	 * @return CacheInterface
 	 *   The caching object used for tokens and roles
 	 */
 	public function getTokenCache()
@@ -638,7 +668,7 @@ class Config
 	/**
 	 * Get the session store used
 	 * 
-	 * @retval SessionStoreInterface
+	 * @return SessionStoreInterface
 	 *   The session store used
 	 */
 	public function getSessionStore()
@@ -656,7 +686,7 @@ class Config
 	 * - Either user authentication or application authentication must be configured with
 	 *   non-empty actor ID and pre-shared key
 	 * 
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the Config object can be used for performing Requests
 	 */
 	public function validateForRequests()

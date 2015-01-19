@@ -58,7 +58,7 @@ interface SessionStoreInterface
 	 * 
 	 * The behavior of this function is undefined if there is no active session.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The current session ID
 	 */
 	public function getId();
@@ -68,7 +68,7 @@ interface SessionStoreInterface
 	 * 
 	 * The behavior of this function is undefined if there is no active session.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The current session key
 	 */
 	public function getKey();
@@ -78,7 +78,7 @@ interface SessionStoreInterface
 	 * 
 	 * The behavior of this function is undefined if there is no active session.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   Retrieve the ID of the user logged in with the current session
 	 */
 	public function getUserId();
@@ -88,7 +88,7 @@ interface SessionStoreInterface
 	 * 
 	 * The behavior of this function is undefined if there is no active session.
 	 * 
-	 * @retval int
+	 * @return int
 	 *   The number of seconds before this session expires; negative if the session has expired
 	 */
 	public function getTimeout();
@@ -98,7 +98,7 @@ interface SessionStoreInterface
 	 * 
 	 * @param string $key
 	 *   Cache key to check for existence
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the given key is set in the cache
 	 */
 	public function hasCacheKey($key);
@@ -111,7 +111,7 @@ interface SessionStoreInterface
 	 * 
 	 * @param string $key
 	 *   Cache key to get the cached value of
-	 * @retval mixed
+	 * @return mixed
 	 *   The cached value
 	 */
 	public function getCacheKey($key);

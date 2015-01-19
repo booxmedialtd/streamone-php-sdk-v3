@@ -20,7 +20,7 @@ class SessionCache implements CacheInterface
 	/**
 	 * Session store to store cached values in
 	 * 
-	 * @var SessionStoreInterface
+	 * @var SessionStoreInterface $session_store
 	 */
 	private $session_store;
 	
@@ -54,7 +54,7 @@ class SessionCache implements CacheInterface
 	/**
 	 * Retrieve the session store used to store cached values
 	 * 
-	 * @retval SessionStoreInterface
+	 * @return SessionStoreInterface
 	 *   The session store used to store cached values
 	 */
 	public function getSessionStore()
