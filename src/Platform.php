@@ -3,9 +3,7 @@
  * @addtogroup StreamOneSDK The StreamOne SDK
  * 
  * The StreamOne SDK contains various classes for communication with the StreamOne platform. All
- * classes work with configuration parameters defined in StreamOneConfig.php. To start working
- * with the SDK, copy StreamOneConfig.dist.php to StreamOneConfig.php and adjust the settings
- * where needed.
+ * classes work with configuration settings, which can be set using the Config class.
  * 
  * The central class in the SDK is the Platform class, which holds the active configuration
  * and can be used as a factory for the various operations to perform with the SDK.
@@ -103,3 +101,7 @@ class Platform
 		return new Actor($this->config, $session);
 	}
 }
+
+/**
+ * @}
+ */
