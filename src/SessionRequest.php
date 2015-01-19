@@ -16,7 +16,10 @@ namespace StreamOne\API\v3;
  */
 class SessionRequest extends Request
 {
-	/// The session store containing the required session information
+	/**
+	 * @var SessionStoreInterface $session_store
+	 *   The session store containing the required session information
+	 */
 	private $session_store;
 	
 	/**
@@ -54,7 +57,7 @@ class SessionRequest extends Request
 	 * 
 	 * This method retrieves the signing key of the parent class and appends the session key.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The key to use for signing requests
 	 */
 	protected function signingKey()
@@ -70,7 +73,7 @@ class SessionRequest extends Request
 	 * This method retrieves the signing parameters of its parent class, and adds the session
 	 * parameter to the returned list of parameters.
 	 *
-	 * @retval array
+	 * @return array
 	 *   An array containing the parameters needed for signing
 	 */
 	protected function parametersForSigning()

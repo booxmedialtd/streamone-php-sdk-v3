@@ -10,7 +10,7 @@ abstract class CacheInterfaceTest extends PHPUnit_Framework_TestCase
 	/**
 	 * Construct a cache to test
 	 * 
-	 * @retval CacheInterface
+	 * @return CacheInterface
 	 *   An instantiated cache to run the tests on
 	 */
 	abstract protected function constructCache();

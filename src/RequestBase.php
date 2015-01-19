@@ -95,7 +95,7 @@ abstract class RequestBase
 	 *
 	 * @param string|null $account
 	 *   ID of the account to use for the request; if null, clear account
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccount($account)
@@ -150,7 +150,7 @@ abstract class RequestBase
 	 *
 	 * @param array $accounts
 	 *   Array with IDs of the accounts to use for the request; if empty, clear accounts
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setAccounts(array $accounts)
@@ -199,7 +199,7 @@ abstract class RequestBase
 	 *
 	 * @param string|null $customer
 	 *   ID of the customer to use for the request; if null clear customer
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setCustomer($customer)
@@ -248,7 +248,7 @@ abstract class RequestBase
 	 *
 	 * @param DateTimeZone $time_zone
 	 *   Timezone to use for the request
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setTimeZone(\DateTimeZone $time_zone)
@@ -265,7 +265,7 @@ abstract class RequestBase
 	 *   The name of the argument
 	 * @param string $value
 	 *   The new value for the argument; null will be translated to an empty string
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setArgument($argument, $value)
@@ -282,7 +282,7 @@ abstract class RequestBase
 	/**
 	 * Retrieve the currently defined arguments
 	 *
-	 * @retval array
+	 * @return array
 	 *   An array containing the currently defined arguments as key=>value pairs
 	 */
 	public function arguments()
@@ -299,7 +299,7 @@ abstract class RequestBase
 	 *
 	 * @param $protocol string
 	 *   The protocol to use
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function setProtocol($protocol)
@@ -320,7 +320,7 @@ abstract class RequestBase
 	 * a protocol without trailing '://'. For example, when the protocol is set to 'https',
 	 * 
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The protocol to use
 	 */
 	public function protocol()
@@ -353,7 +353,7 @@ abstract class RequestBase
 	 * - `host/prefix`
 	 * - `host`
 	 * 
-	 * @retval array
+	 * @return array
 	 *   An array with 3 elements:
 	 *   - protocol: a string with the protocol specified in the API URL, or null if not present
 	 *   - host: a string with the host as specified in the API URL
@@ -376,7 +376,7 @@ abstract class RequestBase
 	/**
 	 * Gather the server, path, parameters, and arguments for the request to execute
 	 * 
-	 * @retval array
+	 * @return array
 	 *   An array with 4 elements:
 	 *   - The server (`protocol://host/prefix`) to send the request to
 	 *   - The path of the request (`/api/command/action`)
@@ -402,7 +402,7 @@ abstract class RequestBase
 	 * This will sign the request, send it to the Internal API server, and analyze the response. To
 	 * check whether the request was successful and returned no error, use the method success().
 	 *
-	 * @retval RequestBase
+	 * @return RequestBase
 	 *   A reference to this object, to allow chaining
 	 */
 	public function execute()
@@ -424,7 +424,7 @@ abstract class RequestBase
 	 * A valid response contains a header and a body, and the header contains at least the fields
 	 * status and statusmessage with correct types.
 	 *
-	 * @retval bool
+	 * @return bool
 	 *   Whether the retrieved response is valid
 	 */
 	public function valid()
@@ -466,7 +466,7 @@ abstract class RequestBase
 	 *
 	 * The request was successful if the response is valid, and the status is 0 (OK).
 	 *
-	 * @retval bool
+	 * @return bool
 	 *   Whether the request was successful
 	 */
 	public function success()
@@ -480,7 +480,7 @@ abstract class RequestBase
 	 * This method returns the response header as received from the server. If the response was
 	 * not valid (check with valid()), this method will return null.
 	 *
-	 * @retval array
+	 * @return array
 	 *   The header of the received response; null if the response was not valid
 	 */
 	public function header()
@@ -499,7 +499,7 @@ abstract class RequestBase
 	 * This method returns the response body as received from the server. If the response was
 	 * not valid (check with valid()), this method will return null.
 	 *
-	 * @retval array
+	 * @return array
 	 *   The body of the received response; null if the response was not valid
 	 */
 	public function body()
@@ -518,7 +518,7 @@ abstract class RequestBase
 	 * This method returns the entire plain-text response as received from the server. If there was
 	 * no valid plain-text response, this method will return null.
 	 *
-	 * @retval string
+	 * @return string
 	 *   The plain-text response; null if no response was received
 	 */
 	public function plainResponse()
@@ -529,7 +529,7 @@ abstract class RequestBase
 	/**
 	 * Retrieve the status returned for this request
 	 *
-	 * @retval int
+	 * @return int
 	 *   The status returned for this request, or null if no valid response was received
 	 */
 	public function status()
@@ -544,7 +544,7 @@ abstract class RequestBase
 	/**
 	 * Retrieve the status message returned for this request
 	 *
-	 * @retval string
+	 * @return string
 	 *   The status message returned for this request, or 'invalid response' if no valid response
 	 *   was received
 	 */
@@ -562,7 +562,7 @@ abstract class RequestBase
 	 *
 	 * Subclasses will overwrite this function to get it from the correct configuration
 	 *
-	 * @retval string
+	 * @return string
 	 *   The base URL of the API
 	 */
 	abstract protected function apiUrl();
@@ -572,7 +572,7 @@ abstract class RequestBase
 	 *
 	 * Subclasses will overwrite this function to provide the correct key
 	 *
-	 * @retval string
+	 * @return string
 	 *   The key used for signing
 	 */
 	abstract protected function signingKey();
@@ -580,7 +580,7 @@ abstract class RequestBase
 	/**
 	 * Retrieve the path to use for the API request
 	 *
-	 * @retval string
+	 * @return string
 	 *   The path for the API request
 	 */
 	protected function path()
@@ -591,7 +591,7 @@ abstract class RequestBase
 	/**
 	 * Retrieve the currently defined parameters
 	 *
-	 * @retval array
+	 * @return array
 	 *   An array containing the currently defined parameters as key=>value pairs
 	 */
 	protected function parameters()
@@ -604,7 +604,7 @@ abstract class RequestBase
 	 *
 	 * Subclasses will add the parameters that are used specifically for those classes
 	 *
-	 * @retval array
+	 * @return array
 	 *   An array containing the parameters needed for signing
 	 */
 	protected function parametersForSigning()
@@ -626,7 +626,7 @@ abstract class RequestBase
 	 * This method will lookup the current path, parameters and arguments, calculates the
 	 * authentication parameters, and returns the new set of parameters.
 	 *
-	 * @retval array
+	 * @return array
 	 *   An array containing the defined parameters, as well as authentication parameters, both as
 	 *   key=>value pairs
 	 */
@@ -641,7 +641,7 @@ abstract class RequestBase
 	/**
 	 * Returns the signature for the current request
 	 *
-	 * @retval String
+	 * @return String
 	 *   The signature for the current request
 	 */
 	protected function signature()
@@ -668,7 +668,7 @@ abstract class RequestBase
 	 *   The request parameters as key=>value pairs
 	 * @param array $arguments
 	 *   The request arguments as key=>value pairs
-	 * @retval string
+	 * @return string
 	 *   The plain-text response from the server; false if the request failed
 	 *
 	 * @codeCoverageIgnore
@@ -716,7 +716,7 @@ abstract class RequestBase
 	/**
 	 * This function returns extra parameters used for stream_context_create in sending requests
 	 *
-	 * @retval array
+	 * @return array
 	 *   Extra parameters to pass to stream_context_create for sending requests
 	 */
 	protected function extraStreamParameters()

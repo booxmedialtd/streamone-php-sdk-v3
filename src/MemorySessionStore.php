@@ -14,19 +14,38 @@ namespace StreamOne\API\v3;
  */
 class MemorySessionStore implements SessionStoreInterface
 {
-	/// The current session ID; null if no active session
+	/**
+	 * @var string|null $id
+	 *   The current session ID; null if no active session
+	 */
 	private $id = null;
-	/// The current session key; null if no active session
+	
+	/**
+	 * @var string|null $key
+	 *   The current session key; null if no active session
+	 */
 	private $key = null;
-	/// The current session timeout as absolute timestamp; null if no active session
+	
+	/**
+	 * @var int|null $timeout
+	 *   The current session timeout as absolute timestamp; null if no active session
+	 */
 	private $timeout = null;
-	/// The user ID of the user logged in with the current session; null if no active session
+	
+	/**
+	 * @var string|null $user_id
+	 *   The user ID of the user logged in with the current session; null if no active session
+	 */
 	private $user_id = null;
-	/// Data store for cached values
+	
+	/**
+	 * @var array $cache
+	 *   Data store for cached values
+	 */
 	private $cache = array();
 	
 	/**
-	 * @copydoc SessionStoreInterface::hasSession()
+	 * {@inheritDoc}
 	 */
 	public function hasSession()
 	{
@@ -49,7 +68,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 
 	/**
-	 * @copydoc SessionStoreInterface::clearSession()
+	 * {@inheritDoc}
 	 */
 	public function clearSession()
 	{
@@ -61,7 +80,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 
 	/**
-	 * @copydoc SessionStoreInterface::setSession()
+	 * {@inheritDoc}
 	 */
 	public function setSession($id, $key, $user_id, $timeout)
 	{
@@ -72,7 +91,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 
 	/**
-	 * @copydoc SessionStoreInterface::setTimeout()
+	 * {@inheritDoc}
 	 */
 	public function setTimeout($timeout)
 	{
@@ -80,7 +99,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getId()
+	 * {@inheritDoc}
 	 */
 	public function getId()
 	{
@@ -88,7 +107,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getKey()
+	 * {@inheritDoc}
 	 */
 	public function getKey()
 	{
@@ -96,7 +115,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getUserId()
+	 * {@inheritDoc}
 	 */
 	public function getUserId()
 	{
@@ -104,7 +123,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getTimeout()
+	 * {@inheritDoc}
 	 */
 	public function getTimeout()
 	{
@@ -113,7 +132,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::hasCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function hasCacheKey($key)
 	{
@@ -121,7 +140,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function getCacheKey($key)
 	{
@@ -129,7 +148,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::setCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function setCacheKey($key, $value)
 	{
@@ -137,7 +156,7 @@ class MemorySessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::unsetCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function unsetCacheKey($key)
 	{

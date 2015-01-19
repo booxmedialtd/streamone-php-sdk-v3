@@ -15,7 +15,7 @@ class RequestException extends \RuntimeException
 	 *
 	 * @param Request $request
 	 *   The request to create an exception from
-	 * @retval RequestException
+	 * @return RequestException
 	 *   The exception corresponding to the given request
 	 */
 	public static function fromRequest(Request $request)

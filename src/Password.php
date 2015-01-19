@@ -6,6 +6,9 @@
 
 namespace StreamOne\API\v3;
 
+/**
+ * Class to generate password-related data
+ */
 class Password
 {
 	/**
@@ -34,7 +37,7 @@ class Password
 	 * @param string $password
 	 *   The plain text password of the user
 	 *
-	 * @retval string
+	 * @return string
 	 *   The hashed password
 	 */
 	public static function generateV2PasswordHash($password)
