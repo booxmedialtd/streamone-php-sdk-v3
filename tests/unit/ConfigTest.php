@@ -144,6 +144,7 @@ class ConfigTest extends PHPUnit_TestCase
 		));
 		$this->assertTrue($config->getRequestCache() instanceof NoopCache);
 		$this->assertTrue($config->getTokenCache() instanceof NoopCache);
+		$this->assertSame($config->getRequestCache(), $config->getTokenCache());
 	}
 	
 	/**
