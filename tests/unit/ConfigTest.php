@@ -22,15 +22,116 @@ class MySessionStore extends MemorySessionStore
 class ConfigTest extends PHPUnit_TestCase
 {
 	/**
+	 * Test the request_cache-option of the constructor with a CacheInterface object
+	 */
+	public function testConstructorRequestCacheObject()
+	{
+		$cache = new NoopCache;
+		$config = new Config(array(
+			'request_cache' => $cache
+		));
+		$this->assertSame($cache, $config->getRequestCache());
+	}
+	
+	/**
+	 * Test the request_cache-option of the constructor with a factory array
+	 */
+	public function testConstructorRequestCacheArray()
+	{
+		$config = new Config(array(
+			'request_cache' => array('NoopCache')
+		));
+		$this->assertTrue($config->getRequestCache() instanceof NoopCache);
+	}
+	
+	/**
+	 * Test the request_cache-option of the constructor with invalid values
+	 * 
+	 * @param mixed $value
+	 *   The (invalid) value to use for the cache option
+	 * 
+	 * @dataProvider provideConstructorRequestCacheInvalid
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructorRequestCacheInvalid($value)
+	{
+		$config = new Config(array(
+			'request_cache' => $value
+		));
+	}
+	
+	public function provideConstructorRequestCacheInvalid()
+	{
+		return array(
+			array('strings are invalid'),
+			array(8),
+			array(true),
+			array(array()), // Array must contain arguments
+			array(new stdClass()), // Object does not implement CacheInterface
+		);
+	}
+	
+	/**
+	 * Test the token_cache-option of the constructor with a CacheInterface object
+	 */
+	public function testConstructorTokenCacheObject()
+	{
+		$cache = new NoopCache;
+		$config = new Config(array(
+			'token_cache' => $cache
+		));
+		$this->assertSame($cache, $config->getTokenCache());
+	}
+	
+	/**
+	 * Test the token_cache-option of the constructor with a factory array
+	 */
+	public function testConstructorTokenCacheArray()
+	{
+		$config = new Config(array(
+			'token_cache' => array('NoopCache')
+		));
+		$this->assertTrue($config->getTokenCache() instanceof NoopCache);
+	}
+	
+	/**
+	 * Test the token_cache-option of the constructor with invalid values
+	 *
+	 * @param mixed $value
+	 *   The (invalid) value to use for the cache option
+	 *
+	 * @dataProvider provideConstructorTokenCacheInvalid
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructorTokenCacheInvalid($value)
+	{
+		$config = new Config(array(
+			'token_cache' => $value
+		));
+	}
+	
+	public function provideConstructorTokenCacheInvalid()
+	{
+		return array(
+			array('strings are invalid'),
+			array(8),
+			array(true),
+			array(array()), // Array must contain arguments
+			array(new stdClass()), // Object does not implement CacheInterface
+		);
+	}
+	
+	/**
 	 * Test the cache-option of the constructor with a CacheInterface object
 	 */
 	public function testConstructorCacheObject()
 	{
 		$cache = new NoopCache;
 		$config = new Config(array(
-			'cache' => $cache
+			 'cache' => $cache
 		));
-		$this->assertSame($cache, $config->getCache());
+		$this->assertSame($cache, $config->getRequestCache());
+		$this->assertSame($cache, $config->getTokenCache());
 	}
 	
 	/**
@@ -41,15 +142,17 @@ class ConfigTest extends PHPUnit_TestCase
 		$config = new Config(array(
 			'cache' => array('NoopCache')
 		));
-		$this->assertTrue($config->getCache() instanceof NoopCache);
+		$this->assertTrue($config->getRequestCache() instanceof NoopCache);
+		$this->assertTrue($config->getTokenCache() instanceof NoopCache);
+		$this->assertSame($config->getRequestCache(), $config->getTokenCache());
 	}
 	
 	/**
 	 * Test the cache-option of the constructor with invalid values
-	 * 
+	 *
 	 * @param mixed $value
 	 *   The (invalid) value to use for the cache option
-	 * 
+	 *
 	 * @dataProvider provideConstructorCacheInvalid
 	 * @expectedException InvalidArgumentException
 	 */
@@ -68,6 +171,30 @@ class ConfigTest extends PHPUnit_TestCase
 			array(true),
 			array(array()), // Array must contain arguments
 			array(new stdClass()), // Object does not implement CacheInterface
+		);
+	}
+	
+	/**
+	 * Test the use_session_for_token_cache-option of the constructor
+	 * 
+	 * @param bool $value
+	 *   The value to use for the use_session_for_token_cache option
+	 * 
+	 * @dataProvider provideConstructorUseSessionForTokenCache
+	 */
+	public function testConstructorUseSessionForTokenCache($value)
+	{
+		$config = new Config(array(
+			'use_session_for_token_cache' => $value
+		));
+		$this->assertSame($value, $config->getUseSessionForTokenCache());
+	}
+	
+	public function provideConstructorUseSessionForTokenCache()
+	{
+		return array(
+			array(true),
+			array(false),
 		);
 	}
 	
