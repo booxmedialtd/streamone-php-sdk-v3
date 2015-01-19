@@ -35,8 +35,6 @@ class PersistentActor extends Actor {
 	 * If actor information can be found in the current session, it will be loaded. Otherwise, a new
 	 * actor will be created. The config of the session will be used for the actor
 	 *
-	 * @param Config $config
-	 *   The configuration object to use for this persistent actor
 	 * @param Session $session
 	 *   The session object to use for this persistent actor
 	 */
