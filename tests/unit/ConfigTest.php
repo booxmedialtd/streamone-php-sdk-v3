@@ -249,6 +249,26 @@ class ConfigTest extends PHPUnit_TestCase
 	}
 	
 	/**
+	 * Test the constructor not starting a php session if not asking for it
+	 */
+	public function testConstructorDoNotStartSession()
+	{
+		session_destroy();
+		
+		$this->assertSame(PHP_SESSION_NONE, session_status());
+		
+		$config = new Config(array(
+			'session_store' => array('MemorySessionStore')
+		));
+		
+		$this->assertSame(PHP_SESSION_NONE, session_status());
+		
+		// Restart session while ignoring errors so the rest of the tests succeed; otherwise,
+		// they will generate a 'headers already sent' error
+		@session_start();
+	}
+	
+	/**
 	 * Test constructCache() successfully constructing a cache
 	 * 
 	 * @param array $args
