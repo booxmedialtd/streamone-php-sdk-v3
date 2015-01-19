@@ -56,6 +56,17 @@ class Session
 	}
 	
 	/**
+	 * Retrieve the configuration used in this session
+	 *
+	 * @return Config
+	 *   The configuration used in this session
+	 */
+	public function getConfig()
+	{
+		return $this->config;
+	}
+	
+	/**
 	 * Retrieve the session store used in this session
 	 * 
 	 * @return SessionStoreInterface
