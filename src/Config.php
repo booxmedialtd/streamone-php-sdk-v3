@@ -113,11 +113,6 @@ class Config
 	 */
 	public function __construct(array $options)
 	{
-		// Instantiate default cache and session store
-		$this->request_cache = new NoopCache;
-		$this->session_store = new PhpSessionStore;
-		$this->token_cache = new NoopCache;
-		
 		// Resolve options from options array
 		$allowed_options = array(
 			'api_url' => 'setApiUrl',
@@ -217,6 +212,20 @@ class Config
 				// Set the correct option with the constructed object
 				call_user_func(array($this, $data['setter']), $object);
 			}
+		}
+		
+		// Instantiate default caches and session store if none was provided
+		if ($this->request_cache === null)
+		{
+			$this->request_cache = new NoopCache;
+		}
+		if ($this->token_cache === null)
+		{
+			$this->token_cache = new NoopCache;
+		}
+		if ($this->session_store === null)
+		{
+			$this->session_store = new PhpSessionStore;
 		}
 	}
 	
