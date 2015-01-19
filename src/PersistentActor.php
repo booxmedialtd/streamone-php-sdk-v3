@@ -33,16 +33,16 @@ class PersistentActor extends Actor {
 	 * Construct a new persistent actor object
 	 *
 	 * If actor information can be found in the current session, it will be loaded. Otherwise, a new
-	 * actor will be created
+	 * actor will be created. The config of the session will be used for the actor
 	 *
 	 * @param Config $config
 	 *   The configuration object to use for this persistent actor
 	 * @param Session $session
 	 *   The session object to use for this persistent actor
 	 */
-	public function __construct(Config $config, Session $session)
+	public function __construct(Session $session)
 	{
-		parent::__construct($config, $session);
+		parent::__construct($session->getConfig(), $session);
 		$this->session = $session;
 		
 		$this->loadFromSession();

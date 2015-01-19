@@ -4,7 +4,6 @@ use StreamOne\API\v3\PersistentActor;
 
 class PersistentActorTest extends PHPUnit_TestCase
 {
-	private static $config;
 	private static $session;
 	
 	/**
@@ -13,7 +12,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 	public static function setUpBeforeClass()
 	{
 		$session_store = new \StreamOne\API\v3\MemorySessionStore;
-		self::$config = new \StreamOne\API\v3\Config(
+		$config = new \StreamOne\API\v3\Config(
 			array(
 				'api_url' => 'api',
 				'authentication_type' => 'user',
@@ -23,7 +22,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 				'session_store' => $session_store
 			)
 		);
-		self::$session = new \StreamOne\API\v3\Session(self::$config);
+		self::$session = new \StreamOne\API\v3\Session($config);
 		$session_store->setSession('id', 'key', 'user_id', 3600);
 	}
 	
@@ -33,7 +32,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 	public function testPersistentActorGlobal()
 	{
 		// Load first actor, set account to null (i.e. global)
-		$persistent_actor_1 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_1 = new PersistentActor(self::$session);
 		// First set it to something not-null, to test we "re-persist" after setting to null
 		$persistent_actor_1->setAccount('abc');
 		$persistent_actor_1->setAccount(null);
@@ -43,7 +42,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$this->assertEmpty($persistent_actor_1->getAccounts());
 		
 		// Load another actor
-		$persistent_actor_2 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_2 = new PersistentActor(self::$session);
 		
 		// Accounts + customer should still be empty
 		$this->assertNull($persistent_actor_2->getCustomer());
@@ -58,7 +57,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$account = 'account123';
 		
 		// Load first actor, set account to null (i.e. global)
-		$persistent_actor_1 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_1 = new PersistentActor(self::$session);
 		$persistent_actor_1->setAccount($account);
 		
 		// Account should be set correctly
@@ -66,7 +65,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$this->assertSame($account, $persistent_actor_1->getAccount());
 		
 		// Load another actor
-		$persistent_actor_2 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_2 = new PersistentActor(self::$session);
 		
 		// Account should still be set correctly
 		$this->assertNull($persistent_actor_2->getCustomer());
@@ -81,7 +80,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$accounts = array('A', 'B');
 		
 		// Load first actor, set accounts to correct value
-		$persistent_actor_1 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_1 = new PersistentActor(self::$session);
 		$persistent_actor_1->setAccounts($accounts);
 		
 		// Accounts should be set correctly
@@ -89,7 +88,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$this->assertSame($accounts, $persistent_actor_1->getAccounts());
 		
 		// Load another actor
-		$persistent_actor_2 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_2 = new PersistentActor(self::$session);
 		
 		// Accounts should still be set correctly
 		$this->assertNull($persistent_actor_2->getCustomer());
@@ -104,7 +103,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$customer = 'C';
 		
 		// Load first actor, set customer to correct value
-		$persistent_actor_1 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_1 = new PersistentActor(self::$session);
 		$persistent_actor_1->setCustomer($customer);
 		
 		// Customer should be set correctly
@@ -112,7 +111,7 @@ class PersistentActorTest extends PHPUnit_TestCase
 		$this->assertSame($customer, $persistent_actor_1->getCustomer());
 		
 		// Load another actor
-		$persistent_actor_2 = new PersistentActor(self::$config, self::$session);
+		$persistent_actor_2 = new PersistentActor(self::$session);
 		
 		// Customer should still be set correctly
 		$this->assertNull($persistent_actor_2->getAccount());
