@@ -30,7 +30,7 @@ class PHPUnit_Constraint_ArrayKeyDoesNotExist extends PHPUnit_Framework_Constrai
 	 *
 	 * @param mixed $other
 	 *   The array to match
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the constraint is met
 	 */
 	protected function matches($other)
@@ -51,7 +51,7 @@ class PHPUnit_Constraint_ArrayKeyDoesNotExist extends PHPUnit_Framework_Constrai
 	/**
 	 * Returns a string representation of the constraint
 	 *
-	 * @retval string
+	 * @return string
 	 *   A string representation of the constraint
 	 */
 	public function toString()
@@ -64,7 +64,7 @@ class PHPUnit_Constraint_ArrayKeyDoesNotExist extends PHPUnit_Framework_Constrai
 	 *
 	 * @param mixed $other
 	 *   Evaluated value or object
-	 * @retval string
+	 * @return string
 	 *   The description of the failure
 	 */
 	protected function failureDescription($other)

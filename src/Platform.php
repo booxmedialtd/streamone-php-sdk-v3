@@ -23,8 +23,8 @@ namespace StreamOne\API\v3;
 class Platform
 {
 	/**
-	 * The configuration used for this platform
-	 * @var Config
+	 * @var Config $config
+	 *   The configuration used for this platform
 	 */
 	private $config;
 	
@@ -46,7 +46,7 @@ class Platform
 	/**
 	 * Get the Config object used by this Platform instance
 	 * 
-	 * @retval Config
+	 * @return Config
 	 *   The Config object used by this Platform instance
 	 */
 	public function getConfig()
@@ -62,7 +62,7 @@ class Platform
 	 * @param string $action
 	 *   The action to perform on the API command
 	 * 
-	 * @retval Request
+	 * @return Request
 	 *   A request to the given command and action
 	 */
 	public function newRequest($command, $action)
@@ -77,7 +77,7 @@ class Platform
 	 *   The session store to use for this session; if not given, use the one defined in
 	 *   the configuration object
 	 * 
-	 * @retval Session
+	 * @return Session
 	 *   The created session object
 	 */
 	public function newSession(SessionStoreInterface $session_store = null)
@@ -93,7 +93,7 @@ class Platform
 	 *   actor with the given user information); if not given, use actor information
 	 *   from the configuration
 	 * 
-	 * @retval Actor
+	 * @return Actor
 	 *   The created actor object
 	 */
 	public function newActor(Session $session = null)

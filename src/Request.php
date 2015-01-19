@@ -38,20 +38,27 @@ namespace StreamOne\API\v3;
  */
 class Request extends RequestBase
 {
-	/// The Config object with information for this request
+	/**
+	 * @var Config $config
+	 *   The Config object with information for this request
+	 */
 	private $config;
 	
 	/**
-	 * Whether the response was retrieved from the cache
+	 * @var bool $from_cache
+	 *   Whether the response was retrieved from the cache
 	 */
 	private $from_cache = false;
 
 	/**
-	 * If the response was retrieved from the cache, how old it is in seconds; otherwise null
+	 * @var int|null $cache_age
+	 *   If the response was retrieved from the cache, how old it is in seconds; otherwise null
 	 */
 	private $cache_age = null;
 
 	/**
+	 * Construct a new request
+	 * 
 	 * @see RequestBase::__construct
 	 * 
 	 * @param string $command
@@ -111,7 +118,7 @@ class Request extends RequestBase
 	 *
 	 * @see RequestBase::execute
 	 *
-	 * @retval Request
+	 * @return Request
 	 *   A reference to this object, to allow chaining
 	 */
 	public function execute()
@@ -135,7 +142,7 @@ class Request extends RequestBase
 	/**
 	 * Retrieve whether this response was retrieved from cache
 	 *
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the response was retrieved from cache
 	 */
 	public function fromCache()
@@ -146,7 +153,7 @@ class Request extends RequestBase
 	/**
 	 * Retrieve the age of the response retrieved from cache
 	 *
-	 * @retval int
+	 * @return int
 	 *   The age of the response retrieved from cache in seconds. If the response was not
 	 *   retrieved from cache, this will return null instead.
 	 */
@@ -229,7 +236,7 @@ class Request extends RequestBase
 	/**
 	 * Check whether the response is cacheable
 	 * 
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if a successful response was given, which is cacheable
 	 */
 	protected function cacheable()
@@ -249,7 +256,7 @@ class Request extends RequestBase
 	/**
 	 * Determine the key to use for caching
 	 * 
-	 * @retval string
+	 * @return string
 	 *   A cache-key representing this request
 	 */
 	protected function cacheKey()
@@ -261,7 +268,7 @@ class Request extends RequestBase
 	/**
 	 * Attempt to retrieve the result for the current request from the cache
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The cached plain text response if it was found in the cache; false otherwise
 	 */
 	protected function retrieveCache()

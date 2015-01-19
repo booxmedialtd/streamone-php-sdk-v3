@@ -11,13 +11,22 @@ namespace StreamOne\API\v3;
  */
 class Session
 {
-	/// The configuration object to use for this Session
+	/**
+	 * @var Config $config
+	 *   The configuration object to use for this Session
+	 */
 	private $config;
 	
-	/// The session store to use for this session
+	/**
+	 * @var SessionStoreInterface $session_store
+	 *   The session store to use for this session
+	 */
 	private $session_store;
 	
-	/// The last request executed by the start() method
+	/**
+	 * @var Request $start_request
+	 *   The last request executed by the start() method
+	 */
 	private $start_request = null;
 	
 	/**
@@ -49,7 +58,7 @@ class Session
 	/**
 	 * Retrieve the session store used in this session
 	 * 
-	 * @retval SessionStoreInterface
+	 * @return SessionStoreInterface
 	 *   The session store used in this session
 	 */
 	public function getSessionStore()
@@ -62,7 +71,7 @@ class Session
 	 * 
 	 * If there is no active session, it is only possible to start a new session.
 	 * 
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if there is an active session
 	 */
 	public function isActive()
@@ -83,7 +92,7 @@ class Session
 	 * @param string $ip
 	 *   The IP address of the user creating the session
 	 *
-	 * @retval bool
+	 * @return bool
 	 *   Whether the session has been started succesfully; if the session was not created
 	 *   successfully, 
 	 */
@@ -154,7 +163,7 @@ class Session
 	 * 
 	 * This method should not be called before start() is called.
 	 * 
-	 * @retval int
+	 * @return int
 	 *   The status of the last request of the last call to start(), or null if the
 	 *   reponse was invalid
 	 * 
@@ -185,7 +194,7 @@ class Session
 	 * 
 	 * This method should not be called before start() is called.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The status message of the last request of the last call to start(), or null if the
 	 *   reponse was invalid
 	 * 
@@ -215,7 +224,7 @@ class Session
 	 * @throw \LogicException
 	 *   There is currently no active session
 	 * 
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the session was successfully deleted in the API. If not, the session
 	 *   is still cleared from the session store and the session is therefore always inactive
 	 *   after this method returns.
@@ -244,7 +253,7 @@ class Session
 	 *   The command for the new request
 	 * @param string $action
 	 *   The action for the new request
-	 * @retval SessionRequest
+	 * @return SessionRequest
 	 *   The new request using the currently active session for authentication
 	 * 
 	 * @throws \LogicException
@@ -265,7 +274,7 @@ class Session
 	 * 
 	 * This method can only be called if there is an active session.
 	 * 
-	 * @retval string
+	 * @return string
 	 *   The ID of the user currently logged in with this session
 	 * 
 	 * @throw \LogicException

@@ -34,7 +34,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 
 	/**
-	 * @copydoc SessionStoreInterface::hasSession()
+	 * {@inheritDoc}
 	 */
 	public function hasSession()
 	{
@@ -65,9 +65,9 @@ class PhpSessionStore implements SessionStoreInterface
 		
 		return false;
 	}
-
+	
 	/**
-	 * @copydoc SessionStoreInterface::clearSession()
+	 * {@inheritDoc}
 	 */
 	public function clearSession()
 	{
@@ -77,9 +77,9 @@ class PhpSessionStore implements SessionStoreInterface
 		unset($_SESSION[self::USER_ID_KEY]);
 		unset($_SESSION[self::CACHE_KEY]);
 	}
-
+	
 	/**
-	 * @copydoc SessionStoreInterface::setSession()
+	 * {@inheritDoc}
 	 */
 	public function setSession($id, $key, $user_id, $timeout)
 	{
@@ -89,9 +89,9 @@ class PhpSessionStore implements SessionStoreInterface
 		$_SESSION[self::TIMEOUT_KEY] = time() + $timeout;
 		$_SESSION[self::CACHE_KEY] = array();
 	}
-
+	
 	/**
-	 * @copydoc SessionStoreInterface::setTimeout()
+	 * {@inheritDoc}
 	 */
 	public function setTimeout($timeout)
 	{
@@ -99,7 +99,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getId()
+	 * {@inheritDoc}
 	 */
 	public function getId()
 	{
@@ -107,7 +107,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getKey()
+	 * {@inheritDoc}
 	 */
 	public function getKey()
 	{
@@ -115,7 +115,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getUserId()
+	 * {@inheritDoc}
 	 */
 	public function getUserId()
 	{
@@ -123,7 +123,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getTimeout()
+	 * {@inheritDoc}
 	 */
 	public function getTimeout()
 	{
@@ -132,7 +132,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::hasCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function hasCacheKey($key)
 	{
@@ -140,7 +140,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::getCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function getCacheKey($key)
 	{
@@ -148,7 +148,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::setCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function setCacheKey($key, $value)
 	{
@@ -156,7 +156,7 @@ class PhpSessionStore implements SessionStoreInterface
 	}
 	
 	/**
-	 * @copydoc SessionStoreInterface::unsetCacheKey()
+	 * {@inheritDoc}
 	 */
 	public function unsetCacheKey($key)
 	{

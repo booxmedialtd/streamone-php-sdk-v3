@@ -14,19 +14,34 @@ namespace StreamOne\API\v3;
  */
 class Actor
 {
-	/// The configuration object to use for this Actor
+	/**
+	 * @var Config $config
+	 *   The configuration object to use for this Actor
+	 */
 	private $config;
-
-	/// The session object to use for this Actor; null if not using a session
+	
+	/**
+	 * @var Session|null $session
+	 *   The session object to use for this Actor; null if not using a session
+	 */
 	private $session;
 	
-	/// The cache to use for storing data about tokens and roles
+	/**
+	 * @var CacheInterface $token_cache
+	 *   The cache to use for storing data about tokens and roles
+	 */
 	private $token_cache;
-
-	/// The customer to use for this Actor
+	
+	/**
+	 * @var string|null $customer
+	 *   The customer to use for this Actor
+	 */
 	private $customer = null;
-
-	/// The account(s) to use for this Actor
+	
+	/**
+	 * @var array $accounts
+	 *   The account(s) to use for this Actor
+	 */
 	private $accounts = array();
 
 	/**
@@ -61,7 +76,7 @@ class Actor
 	/**
 	 * Get the config for this actor
 	 * 
-	 * @retval Config
+	 * @return Config
 	 *   The config used for this actor
 	 */
 	public function getConfig()
@@ -72,7 +87,7 @@ class Actor
 	/**
 	 * Get the session used for this actor
 	 * 
-	 * @retval Session|null
+	 * @return Session|null
 	 *   The session used for this actor; null if not using a session
 	 */
 	public function getSession()
@@ -103,7 +118,7 @@ class Actor
 	/**
 	 * Get the account used for this actor
 	 *
-	 * @retval string|null
+	 * @return string|null
 	 *   ID of the account used for this actor; null if none. If more than one account has been set
 	 *   (with setAccounts), the first one will be returned
 	 */
@@ -132,7 +147,7 @@ class Actor
 	/**
 	 * Get the accounts used for this actor
 	 *
-	 * @retval array
+	 * @return array
 	 *   The IDs of the accounts used for this actor; empty array if none
 	 */
 	public function getAccounts()
@@ -143,7 +158,7 @@ class Actor
 	/**
 	 * Whether this actor is for at least one account
 	 *
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if this actor is for at least one account
 	 */
 	protected function hasAccounts()
@@ -167,7 +182,7 @@ class Actor
 	/**
 	 * Get the customer used for this actor
 	 *
-	 * @retval string|null
+	 * @return string|null
 	 *   The ID of the customer used for this actor; null if none
 	 */
 	public function getCustomer()
@@ -183,7 +198,7 @@ class Actor
 	 * @param string $action
 	 *   The action to perform on the API command
 	 *
-	 * @retval Request
+	 * @return Request
 	 *   A request to the given command and action for the given actor
 	 *
 	 * @throws \LogicException
@@ -224,7 +239,7 @@ class Actor
 	 * 
 	 * @param string $token
 	 *   The token to check for
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the current actor has the given token
 	 * @throws RequestException
 	 *   If loading the roles from the API failed
@@ -273,7 +288,7 @@ class Actor
 	 * 
 	 * @param array $roles
 	 *   The roles as returned from the getmyroles API actions
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the api/myroles action should be checked for tokens
 	 */
 	protected function shouldCheckMyTokens($roles)
@@ -298,7 +313,7 @@ class Actor
 	 * 
 	 * @param string $token
 	 *   The token to check for
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the current actor has the given token
 	 * @throws RequestException
 	 *   If loading the tokens from the API failed
@@ -313,7 +328,7 @@ class Actor
 	/**
 	 * Get the tokens for the current actor
 	 * 
-	 * @retval array
+	 * @return array
 	 *   The tokens for the current actor
 	 * @throws RequestException
 	 *   If loading the tokens from the API failed
@@ -332,7 +347,7 @@ class Actor
 	/**
 	 * Load the tokens for the current actor from the cache
 	 *
-	 * @retval array
+	 * @return array
 	 *   The tokens for the current actor, loaded from the cache. If the cache does not contain the
 	 *   roles false will be returned
 	 */
@@ -344,7 +359,7 @@ class Actor
 	/**
 	 * Determine the key to use for caching tokens
 	 *
-	 * @retval string
+	 * @return string
 	 *   A cache-key used for tokens
 	 */
 	protected function tokensCacheKey()
@@ -359,7 +374,7 @@ class Actor
 	 * 
 	 * This will also store the tokens in the cache
 	 * 
-	 * @retval array
+	 * @return array
 	 *   The tokens for the current actor
 	 * @throws RequestException
 	 *   If loading the tokens from the API failed
@@ -387,7 +402,7 @@ class Actor
 	 *   The roles as returned from the getmyroles API actions
 	 * @param string $token
 	 *   The token to check
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the current actor has the given token in any role, taking into account
 	 *   customers
 	 */
@@ -412,7 +427,7 @@ class Actor
 	 *   The roles as returned from the getmyroles API actions
 	 * @param string $token
 	 *   The token to check
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the current actor has the given token in any role, taking into account
 	 *   customers and accounts
 	 */
@@ -444,7 +459,7 @@ class Actor
 	 *   The customer to use for checking
 	 * @param string|null $account
 	 *   The account to use for checking
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the given role has the given token and is a super-role if the given
 	 *   customer and account
 	 */
@@ -457,7 +472,7 @@ class Actor
 	/**
 	 * Get the roles for the current configuration and session
 	 * 
-	 * @retval array
+	 * @return array
 	 *   An array containing all the roles for the current configuration and session
 	 * @throws RequestException
 	 *   If loading the roles from the API failed
@@ -491,7 +506,7 @@ class Actor
 	 *
 	 * @param string $actor_type
 	 *   The actor type to load roles for; either "user" or "application"
-	 * @retval array|bool
+	 * @return array|bool
 	 *   The roles for the current configuration and session, loaded from the cache. If the cache
 	 *   does not contain the roles false will be returned
 	 */
@@ -505,7 +520,7 @@ class Actor
 	 *
 	 * @param string $actor_type
 	 *   The actor type to determine the cache key for; either "user" or "application"
-	 * @retval string
+	 * @return string
 	 *   A cache-key used for roles
 	 */
 	protected function rolesCacheKey($actor_type)
@@ -519,7 +534,7 @@ class Actor
 	 * 
 	 * @param string $actor_type
 	 *   The actor type to load roles for; either "user" or "application"
-	 * @retval array
+	 * @return array
 	 *   The roles for the current configuration and session, loaded from the API
 	 * @throws RequestException
 	 *   If loading the roles from the API failed
@@ -557,7 +572,7 @@ class Actor
 	 *   The customer to check for or null if no customer
 	 * @param string|null $account
 	 *   The account to check for or null if no account
-	 * @retval bool
+	 * @return bool
 	 *   True if and only if the given role is a super-role of the given arguments
 	 */
 	protected function roleIsSuperOf($role, $customer, $account)
