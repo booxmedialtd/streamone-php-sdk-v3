@@ -332,39 +332,32 @@ class ActorTest extends PHPUnit_TestCase
 	}
 	
 	/**
-	 * Test that the token cache is set from the config if no session is provided
-	 * 
-	 * @param bool $use_session_for_token_cache
-	 *   Whether to use the session for the token cache
-	 * 
-	 * @dataProvider provideTokenCacheWithSession
+	 * Test that the token cache is set from the config if a session is provided but not used for
+	 * token cache
 	 */
-	public function testTokenCacheWithSession($use_session_for_token_cache)
+	public function testTokenCacheWithSessionNotUsed()
 	{
 		/** @var Config $config */
 		$config = self::$configs['application'];
-		$config->setUseSessionForTokenCache($use_session_for_token_cache);
 		$actor = new Actor($config, self::$sessions['application']);
 		
-		if ($use_session_for_token_cache)
-		{
-			$this->assertInstanceOf('\StreamOne\API\v3\SessionCache', $actor->getTokenCache());
-		}
-		else
-		{
-			$this->assertSame($actor->getConfig()->getTokenCache(), $actor->getTokenCache());
-		}
-		
-		// Set it back again
-		$config->setUseSessionForTokenCache(false);
+		$this->assertSame($actor->getConfig()->getTokenCache(), $actor->getTokenCache());
 	}
 	
-	public function provideTokenCacheWithSession()
+	/**
+	 * Test that the token cache is set from the session if a session is provided and used for
+	 * token cache
+	 */
+	public function testTokenCacheWithSessionUsed()
 	{
-		return array(
-			array(true),
-			array(false),
-		);
+		/** @var Config $config */
+		$config = self::$configs['application'];
+		$config->setUseSessionForTokenCache(true);
+		$actor = new Actor($config, self::$sessions['application']);
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionCache', $actor->getTokenCache());
+		
+		$config->setUseSessionForTokenCache(false);
 	}
 	
 	/**
