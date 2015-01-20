@@ -16,12 +16,12 @@ class PersistentActor extends Actor {
 	/**
 	 * Key used to store accounts for this actor in the session
 	 */
-	const ACCOUNTS_CACHE_KEY = 'persistentactor:accounts';
+	const ACCOUNTS_CACHE_KEY = 's1:persistentactor:accounts';
 	
 	/**
 	 * Key used to store customer for this actor in the session
 	 */
-	const CUSTOMER_CACHE_KEY = 'persistentactor:customer';
+	const CUSTOMER_CACHE_KEY = 's1:persistentactor:customer';
 	
 	/**
 	 * @var Session $session
