@@ -8,6 +8,9 @@ namespace StreamOne\API\v3;
 
 /**
  * Interface for a key-based cache 
+ * 
+ * Note: all cache keys starting with "s1:" are used by the SDK. If you want to use this cache,
+ * please use cache keys not starting with "s1:"
  */
 interface CacheInterface
 {

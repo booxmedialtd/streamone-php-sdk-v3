@@ -94,6 +94,17 @@ class Actor
 	{
 		return $this->session;
 	}
+	
+	/**
+	 * Get the token cache used for this actor
+	 * 
+	 * @return CacheInterface
+	 *   The token cache used for this actor
+	 */
+	public function getTokenCache()
+	{
+		return $this->token_cache;
+	}
 
 	/**
 	 * Set the account to use for this actor
@@ -364,7 +375,7 @@ class Actor
 	 */
 	protected function tokensCacheKey()
 	{
-		return 'tokens:' . $this->config->getAuthenticationType() . ':' .
+		return 's1:tokens:' . $this->config->getAuthenticationType() . ':' .
 		       $this->config->getAuthenticationActorId() . ':' . $this->customer . ':' .
 		       implode('|', $this->accounts);
 	}
@@ -525,7 +536,7 @@ class Actor
 	 */
 	protected function rolesCacheKey($actor_type)
 	{
-		return 'roles:' . $actor_type . ':' .
+		return 's1:roles:' . $actor_type . ':' .
 		       $this->config->getAuthenticationActorId();
 	}
 	
