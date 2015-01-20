@@ -322,6 +322,45 @@ class ActorTest extends PHPUnit_TestCase
 	}
 	
 	/**
+	 * Test that the token cache is set from the config if no session is provided
+	 */
+	public function testTokenCacheWithoutSession()
+	{
+		$actor = new Actor(self::$configs['user']);
+		
+		$this->assertSame($actor->getConfig()->getTokenCache(), $actor->getTokenCache());
+	}
+	
+	/**
+	 * Test that the token cache is set from the config if a session is provided but not used for
+	 * token cache
+	 */
+	public function testTokenCacheWithSessionNotUsed()
+	{
+		/** @var Config $config */
+		$config = self::$configs['application'];
+		$actor = new Actor($config, self::$sessions['application']);
+		
+		$this->assertSame($actor->getConfig()->getTokenCache(), $actor->getTokenCache());
+	}
+	
+	/**
+	 * Test that the token cache is set from the session if a session is provided and used for
+	 * token cache
+	 */
+	public function testTokenCacheWithSessionUsed()
+	{
+		/** @var Config $config */
+		$config = self::$configs['application'];
+		$config->setUseSessionForTokenCache(true);
+		$actor = new Actor($config, self::$sessions['application']);
+		
+		$this->assertInstanceOf('\StreamOne\API\v3\SessionCache', $actor->getTokenCache());
+		
+		$config->setUseSessionForTokenCache(false);
+	}
+	
+	/**
 	 * Test the session-option of the constructor
 	 *
 	 * @param string|null $session
