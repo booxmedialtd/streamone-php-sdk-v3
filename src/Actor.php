@@ -217,7 +217,7 @@ class Actor
 	 */
 	public function newRequest($command, $action)
 	{
-		$request = $this->initializeRequest($command, $action);
+		$request = $this->createCleanRequest($command, $action);
 		
 		if ($this->customer !== null)
 		{
@@ -275,9 +275,10 @@ class Actor
 	}
 	
 	/**
-	 * Initialize a new request for a given command and action
+	 * Create a 'clean' request for a given command and action
 	 * 
-	 * This will make sure a session request is used if a session is active
+	 * This will make sure a session request is used if a session is active. No actor or customer
+	 * will be set on this request, even if the actor does have them. 
 	 *
 	 * @param string $command
 	 *   The API command to call
@@ -290,7 +291,7 @@ class Actor
 	 * @throws \LogicException
 	 *   When a session is used for this actor and that session is not active
 	 */
-	protected function initializeRequest($command, $action)
+	protected function createCleanRequest($command, $action)
 	{
 		if ($this->session !== null)
 		{
