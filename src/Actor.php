@@ -217,15 +217,8 @@ class Actor
 	 */
 	public function newRequest($command, $action)
 	{
-		if ($this->session !== null)
-		{
-			$request = $this->session->newRequest($command, $action);
-		}
-		else
-		{
-			$request = new Request($command, $action, $this->config);
-		}
-
+		$request = $this->initializeRequest($command, $action);
+		
 		if ($this->customer !== null)
 		{
 			$request->setCustomer($this->customer);
@@ -278,6 +271,34 @@ class Actor
 		else
 		{
 			return $this->checkAccountHasToken($roles, $token);
+		}
+	}
+	
+	/**
+	 * Initialize a new request for a given command and action
+	 * 
+	 * This will make sure a session request is used if a session is active
+	 *
+	 * @param string $command
+	 *   The API command to call
+	 * @param string $action
+	 *   The action to perform on the API command
+	 *
+	 * @return Request
+	 *   A request to the given command and action
+	 *
+	 * @throws \LogicException
+	 *   When a session is used for this actor and that session is not active
+	 */
+	protected function initializeRequest($command, $action)
+	{
+		if ($this->session !== null)
+		{
+			return $this->session->newRequest($command, $action);
+		}
+		else
+		{
+			return new Request($command, $action, $this->config);
 		}
 	}
 	
