@@ -101,6 +101,17 @@ class Request extends RequestBase
 				break;
 		}
 	}
+	
+	/**
+	 * Retrieve the config used for this request
+	 * 
+	 * @return Config
+	 *   The config used for this request
+	 */
+	public function getConfig()
+	{
+		return $this->config;
+	}
 
 	/**
 	 * Execute the prepared request

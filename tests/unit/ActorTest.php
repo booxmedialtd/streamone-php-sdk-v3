@@ -16,8 +16,7 @@ class TestActorRequest extends Request
 	public function __construct(Request $request)
 	{
 		$this->request = $request;
-		$this->setCommand($request->command());
-		$this->setAction($request->action());
+		parent::__construct($request->command(), $request->action(), $request->getConfig());
 	}
 	
 	/**

@@ -99,17 +99,6 @@ abstract class RequestBase
 	}
 	
 	/**
-	 * Set the API command to call
-	 * 
-	 * @param string $command
-	 *   The API command to call
-	 */
-	protected function setCommand($command)
-	{
-		$this->command = $command;
-	}
-	
-	/**
 	 * The action to perform on the API command
 	 * 
 	 * @return string
@@ -118,17 +107,6 @@ abstract class RequestBase
 	public function action()
 	{
 		return $this->action;
-	}
-	
-	/**
-	 * Set the action to perform on the API command
-	 *
-	 * @param string $action
-	 *   The action to perform on the API command
-	 */
-	protected function setAction($action)
-	{
-		$this->action = $action;
 	}
 
 	/**
