@@ -20,12 +20,12 @@ abstract class RequestBase
 	/**
 	 * The API command to call
 	 */
-	protected $command;
+	private $command;
 
 	/**
 	 * The action to perform on the API command called
 	 */
-	protected $action;
+	private $action;
 
 	/**
 	 * The parameters to use for the API request
@@ -33,7 +33,7 @@ abstract class RequestBase
 	 * The parameters are the GET-parameters sent, and include meta-data for the request such
 	 * as API-version, output type, and authentication parameters. They cannot directly be set.
 	 */
-	protected $parameters;
+	private $parameters;
 
 	/**
 	 * The arguments to use for the API request
@@ -41,7 +41,7 @@ abstract class RequestBase
 	 * The arguments are the POST-data sent, and represent the arguments for the specific API
 	 * command and action called.
 	 */
-	protected $arguments;
+	private $arguments;
 
 	/**
 	 * The plain-text response received from the API server
@@ -49,7 +49,7 @@ abstract class RequestBase
 	 * This is the plain-text response as received from the server, or null if no plain-text
 	 * response has been received.
 	 */
-	protected $plain_response;
+	private $plain_response;
 
 	/**
 	 * The parsed response received from the API
@@ -57,12 +57,12 @@ abstract class RequestBase
 	 * This is the parsed response as received from the server, or null if no parseable response
 	 * has been received.
 	 */
-	protected $response;
+	private $response;
 
 	/**
 	 * The protocol to use for requests
 	 */
-	protected $protocol = null;
+	private $protocol = null;
 
 	/**
 	 * Construct a new request
@@ -85,6 +85,28 @@ abstract class RequestBase
 
 		// Arguments starts as an empty array
 		$this->arguments = array();
+	}
+	
+	/**
+	 * Get the API command to call
+	 * 
+	 * @return string
+	 *   The API command to call
+	 */
+	public function command()
+	{
+		return $this->command;
+	}
+	
+	/**
+	 * The action to perform on the API command
+	 * 
+	 * @return string
+	 *   The action to perform on the API command
+	 */
+	public function action()
+	{
+		return $this->action;
 	}
 
 	/**
@@ -257,7 +279,7 @@ abstract class RequestBase
 
 		return $this;
 	}
-
+	
 	/**
 	 * Set the value of a single argument
 	 *
@@ -275,10 +297,10 @@ abstract class RequestBase
 			$value = '';
 		}
 		$this->arguments[$argument] = $value;
-
+		
 		return $this;
 	}
-
+	
 	/**
 	 * Retrieve the currently defined arguments
 	 *
@@ -288,6 +310,38 @@ abstract class RequestBase
 	public function arguments()
 	{
 		return $this->arguments;
+	}
+	
+	/**
+	 * Set the value of a single parameter
+	 *
+	 * @param string $parameter
+	 *   The name of the parameter
+	 * @param string $value
+	 *   The new value for the parameter; null will be translated to an empty string
+	 * @return RequestBase
+	 *   A reference to this object, to allow chaining
+	 */
+	protected function setParameter($parameter, $value)
+	{
+		if ($value === null)
+		{
+			$value = '';
+		}
+		$this->parameters[$parameter] = $value;
+		
+		return $this;
+	}
+	
+	/**
+	 * Retrieve the currently defined parameters
+	 *
+	 * @return array
+	 *   An array containing the currently defined parameters as key=>value pairs
+	 */
+	protected function parameters()
+	{
+		return $this->parameters;
 	}
 
 	/**
@@ -586,17 +640,6 @@ abstract class RequestBase
 	protected function path()
 	{
 		return '/api/' . $this->command . '/' . $this->action;
-	}
-
-	/**
-	 * Retrieve the currently defined parameters
-	 *
-	 * @return array
-	 *   An array containing the currently defined parameters as key=>value pairs
-	 */
-	protected function parameters()
-	{
-		return $this->parameters;
 	}
 
 	/**

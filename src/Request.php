@@ -80,7 +80,7 @@ class Request extends RequestBase
 		// Check if a default account is specified and set it as a parameter. Can later be overridden
 		if ($this->config->hasDefaultAccountId())
 		{
-			$this->parameters['account'] = $this->config->getDefaultAccountId();
+			$this->setParameter('account', $this->config->getDefaultAccountId());
 		}
 		
 		// Validate configuration
@@ -93,13 +93,24 @@ class Request extends RequestBase
 		switch ($this->config->getAuthenticationType())
 		{
 			case Config::AUTH_USER:
-				$this->parameters['authentication_type'] = 'user';
+				$this->setParameter('authentication_type', 'user');
 				break;
 			
 			case Config::AUTH_APPLICATION:
-				$this->parameters['authentication_type'] = 'application';
+				$this->setParameter('authentication_type', 'application');
 				break;
 		}
+	}
+	
+	/**
+	 * Retrieve the config used for this request
+	 * 
+	 * @return Config
+	 *   The config used for this request
+	 */
+	public function getConfig()
+	{
+		return $this->config;
 	}
 
 	/**
