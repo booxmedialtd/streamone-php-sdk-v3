@@ -110,7 +110,8 @@ class Session
 	public function start($username, $password, $ip)
 	{
 		// Initialize session to obtain challenge from API
-		$request = new Request('session', 'initialize', $this->config);
+		$request_factory = $this->config->getRequestFactory();
+		$request = $request_factory->newRequest('session', 'initialize', $this->config);
 		$request->setArgument('user', $username);
 		$request->setArgument('userip', $ip);
 		$request->execute();
@@ -130,7 +131,7 @@ class Session
 		$response = Password::generatePasswordResponse($password, $salt, $challenge);
 
 		// Initializing session was OK, try to start it
-		$request = new Request('session', 'create', $this->config);
+		$request = $request_factory->newRequest('session', 'create', $this->config);
 		$request->setArgument('challenge', $challenge);
 		$request->setArgument('response', $response);
 		if ($needs_v2_hash)
@@ -277,7 +278,9 @@ class Session
 			throw new \LogicException("No active session");
 		}
 		
-		return new SessionRequest($command, $action, $this->config, $this->session_store);
+		$request_factory = $this->config->getRequestFactory();
+		return $request_factory->newSessionRequest($command, $action, $this->config,
+		                                           $this->session_store);
 	}
 
 	/**
