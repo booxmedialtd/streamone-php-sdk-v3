@@ -30,17 +30,21 @@ class Platform
 	
 	/**
 	 * Construct a new Platform
-	 * 
-	 * @param array $configuration
+	 *
+	 * @param array|Config $configuration
 	 *   A key=>value array of configuration options. See the documentation of the Config
-	 *   class for the available configuration options.
-	 * 
+	 *   class for the available configuration options. Can also be a Config instance
+	 *
 	 * @throws \InvalidArgumentException
 	 *   For the same reasons as Config::__construct().
 	 */
-	public function __construct(array $configuration)
+	public function __construct($configuration)
 	{
-		$this->config = new Config($configuration);
+		if (!$configuration instanceof Config)
+		{
+			$configuration = new Config($configuration);
+		}
+		$this->config = $configuration;
 	}
 	
 	/**
