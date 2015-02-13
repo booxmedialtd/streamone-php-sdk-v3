@@ -2,9 +2,16 @@
 
 use StreamOne\API\v3\Config;
 use StreamOne\API\v3\CacheInterface;
+use StreamOne\API\v3\RequestFactory;
 use StreamOne\API\v3\NoopCache;
 use StreamOne\API\v3\SessionStoreInterface;
 use StreamOne\API\v3\MemorySessionStore;
+use StreamOne\API\v3\RequestFactoryInterface;
+
+class MyRequestFactory extends RequestFactory
+{
+	// Add nothing
+}
 
 class MyNoopCache extends NoopCache
 {
@@ -21,6 +28,56 @@ class MySessionStore extends MemorySessionStore
  */
 class ConfigTest extends PHPUnit_TestCase
 {
+	/**
+	 * Test the request_factory-option of the constructor with a RequestFactoryInterface object
+	 */
+	public function testConstructorRequestFactoryObject()
+	{
+		$factory = new RequestFactory();
+		$config = new Config(array(
+			'request_factory' => $factory
+		));
+		$this->assertSame($factory, $config->getRequestFactory());
+	}
+	
+	/**
+	 * Test the request_factory-option of the constructor with a factory array
+	 */
+	public function testConstructorRequestFactoryArray()
+	{
+		$config = new Config(array(
+			'request_factory' => array('RequestFactory')
+		));
+		$this->assertTrue($config->getRequestFactory() instanceof RequestFactory);
+	}
+	
+	/**
+	 * Test the request_factory-option of the constructor with invalid values
+	 *
+	 * @param mixed $value
+	 *   The (invalid) value to use for the cache option
+	 *
+	 * @dataProvider provideConstructorRequestFactoryInvalid
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructorRequestFactoryInvalid($value)
+	{
+		$config = new Config(array(
+			'request_factory' => $value
+		));
+	}
+	
+	public function provideConstructorRequestFactoryInvalid()
+	{
+		return array(
+			array('strings are invalid'),
+			array(8),
+			array(true),
+			array(array()), // Array must contain arguments
+			array(new stdClass()), // Object does not implement CacheInterface
+		);
+	}
+	
 	/**
 	 * Test the request_cache-option of the constructor with a CacheInterface object
 	 */
@@ -266,6 +323,64 @@ class ConfigTest extends PHPUnit_TestCase
 		// Restart session while ignoring errors so the rest of the tests succeed; otherwise,
 		// they will generate a 'headers already sent' error
 		@session_start();
+	}
+	
+	/**
+	 * Test constructRequestFactory() successfully constructing a request factory
+	 *
+	 * @param array $args
+	 *   Function arguments for constructRequestFactory
+	 * @param string $class_name
+	 *   Fully qualified name of the class constructed on success
+	 *
+	 * @dataProvider provideConstructRequestFactory
+	 */
+	public function testConstructRequestFactory(array $args, $class_name)
+	{
+		// Construct a clean Config to work with
+		$config = new Config(array());
+		
+		// Attempt construction; should not throw
+		$request_factory = call_user_func_array(array($config, 'constructRequestFactory'), $args);
+		
+		// Constructed session store must be an instance of RequestFactoryInterface and of
+		// the correct class
+		$this->assertTrue($request_factory instanceof RequestFactoryInterface);
+		$this->assertTrue($request_factory instanceof $class_name);
+	}
+	
+	public function provideConstructRequestFactory()
+	{
+		return array(
+			array(array('RequestFactory'), "StreamOne\\API\\v3\\RequestFactory"),
+			array(array('MyRequestFactory'), "MyRequestFactory"),
+		);
+	}
+	
+	/**
+	 * Test constructRequestFactory() failing with InvalidArgumentException
+	 *
+	 * @param array $args
+	 *   Function arguments for constructRequestFactory
+	 *
+	 * @dataProvider provideConstructRequestFactoryInvalidArgument
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructRequestFactoryInvalidArgument(array $args)
+	{
+		// Construct a clean Config to work with
+		$config = new Config(array());
+		
+		// Attempt construction; should throw InvalidArgumentException
+		$request_factory = call_user_func_array(array($config, 'constructRequestFactory'), $args);
+	}
+	
+	public function provideConstructRequestFactoryInvalidArgument()
+	{
+		return array(
+			array(array('NonExistingRequestFactory')),
+			array(array('stdClass')), // Does not implement RequestFactoryInterface
+		);
 	}
 	
 	/**

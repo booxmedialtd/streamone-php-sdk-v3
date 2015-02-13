@@ -67,7 +67,8 @@ class Platform
 	 */
 	public function newRequest($command, $action)
 	{
-		return new Request($command, $action, $this->config);
+		$request_factory = $this->config->getRequestFactory();
+		return $request_factory->newRequest($command, $action, $this->config);
 	}
 	
 	/**

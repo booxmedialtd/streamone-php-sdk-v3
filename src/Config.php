@@ -59,6 +59,12 @@ class Config
 	private $visible_errors = array(2,3,4,5,7);
 	
 	/**
+	 * @var RequestFactoryInterface $request_factory
+	 *   Request factory to use to instantiate new requests
+	 */
+	private $request_factory = null;
+	
+	/**
 	 * @var CacheInterface $request_cache
 	 *   Caching object to use for requests; must implement CacheInterface
 	 */
@@ -110,6 +116,10 @@ class Config
 	 *                       - see setDefaultAccountId()
 	 * - visible_errors: an array of status codes that result in a very visible error bar
 	 *                   - see setVisibleErrors()
+	 * - request_factory: request factory object to use for creating requests, implementing
+	 *                    RequestFactoryInterface, or an array with the correct arguments to
+	 *                    constructRequestFactory() to create one.
+	 *                    - see setRequestFactory() and constructRequestFactory()
 	 * - cache:         caching object to use for both requests and tokens and roles, implementing
 	 *                  CacheInterface, or an array with the correct arguments to constructCache()
 	 *                  to create one
@@ -191,6 +201,11 @@ class Config
 		
 		// Check possibly to be constructed objects
 		$object_options = array(
+			'request_factory' => array(
+				'class' => 'StreamOne\\API\\v3\\RequestFactoryInterface',
+				'factory' => 'constructRequestFactory',
+				'setter' => 'setRequestFactory',
+			),
 			'cache' => array(
 				'class' => 'StreamOne\\API\\v3\\CacheInterface',
 				'factory' => 'constructCache',
@@ -244,7 +259,11 @@ class Config
 			}
 		}
 		
-		// Instantiate default caches and session store if none was provided
+		// Instantiate default factory, caches and session store if none was provided
+		if ($this->request_factory === null)
+		{
+			$this->request_factory = new RequestFactory();
+		}
 		if ($this->request_cache === null)
 		{
 			$this->request_cache = new NoopCache;
@@ -292,6 +311,40 @@ class Config
 		
 		// Class not found
 		throw new \InvalidArgumentException("Class '" . $name . "' not found");
+	}
+	
+	/**
+	 * Construct a request factory
+	 *
+	 * @param string $name
+	 *   Name of the factory object to construct; can either be a class within the StreamOne\API\v3
+	 *   namespace, or one in the global namespace. Will be resolved in that order. The referenced
+	 *   class must implement RequestFactoryInterface.
+	 * @param mixed $name,...
+	 *   Constructor arguments for the specified factory
+	 * @return RequestFactoryInterface
+	 *   The constructed factory
+	 *
+	 * @throws \InvalidArgumentException
+	 *   There is no class named $name, it does not implement RequestFactoryInterface, or the passed
+	 *   constructor arguments are invalid.
+	 */
+	public function constructRequestFactory($name)
+	{
+		// Will throw InvalidArgumentException if class does not exist
+		$class = $this->resolveReflectionClass($name);
+		
+		// Check if class implements CacheInterface
+		if (!$class->implementsInterface('StreamOne\\API\\v3\\RequestFactoryInterface'))
+		{
+			throw new \InvalidArgumentException("Class " . $name . " does not implement RequestFactoryInterface");
+		}
+		
+		// Construct cache from arguments and return it
+		$args = func_get_args();
+		array_shift($args);
+		
+		return $class->newInstanceArgs($args);
 	}
 	
 	/**
@@ -547,6 +600,34 @@ class Config
 	public function isVisibleError($status)
 	{
 		return in_array($status, $this->getVisibleErrors());
+	}
+	
+	/**
+	 * Set the factory object to use for instantiating requests
+	 *
+	 * The factory object will be used to create (Session)Request objects
+	 * Any caching object used must implement the RequestFactoryInterface.
+	 *
+	 * The SDK provides the following factory class:
+	 * - RequestFactory, which will just use the Request and SessionRequest classes directly (default)
+	 *
+	 * @param RequestFactoryInterface $request_factory
+	 *   The factory object to use
+	 */
+	public function setRequestFactory(RequestFactoryInterface $request_factory)
+	{
+		$this->request_factory = $request_factory;
+	}
+	
+	/**
+	 * Get the request factory object used for instantiating requests
+	 *
+	 * @return RequestFactoryInterface
+	 *   The request factory object used
+	 */
+	public function getRequestFactory()
+	{
+		return $this->request_factory;
 	}
 	
 	/**
