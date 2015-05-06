@@ -1,0 +1,9 @@
+Package: streamone-php-sdk-v3
+Version: FULLVERSION
+Architecture: all
+Maintainer: StreamOne <packages@streamone.nl>
+Pre-Depends:
+Depends:
+Priority: optional
+Homepage: http://www.streamone.nl
+Description: StreamOne PHP SDK version 3
