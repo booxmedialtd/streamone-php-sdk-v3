@@ -1,0 +1,16 @@
+#! /bin/bash -e
+
+case "${1}" in
+	install | upgrade)
+		# Package not yet unpacked, only essentials and pre-deps are available. Normal code goes here
+		;;
+	abort-upgrade)
+		# Postrm upgrade failed
+		;;
+	*)
+		echo "${0} called with invalid arguments: ${@}"
+		exit 1
+		;;
+esac
+
+exit 0

@@ -1,0 +1,16 @@
+#! /bin/bash -e
+
+case "${1}" in
+	configure)
+		# Files unpacked, dependencies unpacked. Normal code goes here
+		;;
+	abort-upgrade | abort-remove | abort-deconfigure)
+		# Files unpacked, dependencies should be present. Something went wrong.
+		;;
+	*)
+		echo "${0} called with invalid arguments: ${@}"
+		exit 1
+		;;
+esac
+
+exit 0

@@ -1,0 +1,19 @@
+#! /bin/bash -e
+
+case "${1}" in
+	remove)
+		# Dependencies should be there. Normal code goes here
+		;;
+	upgrade)
+		# Dependencies should be there. I think this is code to clean up before upgrading to a newer version
+		;;
+	failed-upgrade)
+		# prerm upgrade failed on the old package.
+		;;
+	*)
+		echo "${0} called with invalid arguments: ${@}"
+		exit 1
+		;;
+esac
+
+exit 0

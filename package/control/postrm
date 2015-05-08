@@ -1,0 +1,25 @@
+#! /bin/bash -e
+
+case "${1}" in
+	remove | purge)
+		# Package and dependencies should be gone. Normal code goes here
+		;;
+	upgrade)
+		# Package and dependencies should have been replaced
+		;;
+	disappear)
+		# I'm not sure what happened here
+		;;
+	failed-upgrade)
+		# postrm upgrade on the old package failed
+		;;
+	abort-install | abort-upgrade)
+		# Error handling of preinst failures. Assume same package state as preinst.
+		;;
+	*)
+		echo "${0} called with invalid arguments: ${@}"
+		exit 1
+		;;
+esac
+
+exit 0
