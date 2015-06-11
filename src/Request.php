@@ -16,7 +16,7 @@ namespace StreamOne\API\v3;
  * inspect the retrieved response.
  * 
  * \code
- * use StreamOne\API\v3\Plarform as StreamOnePlatform;
+ * use StreamOne\API\v3\Platform as StreamOnePlatform;
  * $platform = new StreamOnePlatform(array(...));
  * $request = $platform->newRequest('item', 'view');
  * $request->setAccount('Mn9mdVb-02mA')
