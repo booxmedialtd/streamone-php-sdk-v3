@@ -76,9 +76,9 @@ The following configuration options are available:
 * **api_url** (required): this should be the base URL of the API to use. For example: `https://api.streamonecloud.net`.
 * **authentication_type** (required): this should be either `user` or `application` and denotes the type of authentication to use.
 * **user_id** and **user_psk** (required if **authentication_type** is `user`): these should contain the ID and preshared key of the user to use for authentication.
-* **application_id** and **application_psk** (required if **authentication_type** is `application`): these should contain the ID and preshared key of the user to use for authentication.
+* **application_id** and **application_psk** (required if **authentication_type** is `application`): these should contain the ID and preshared key of the application to use for authentication.
 * **default_account_id** (optional): this can be set to the ID of an account and if set, this will be the account to use by default for all API actions.
-* **visible_errors** (optional, defaults to `[2,3,4,5,7]`): a list of all error codes to display prominently.
+* **visible_errors** (optional, defaults to `[2,3,4,5,7]`): a list of all error codes to display prominently. All possible errors are defined in `Status.php`.
 * **request_factory** (optional, defaults to a `StreamOne\API\v3\RequestFactory`): factory to use for creating requests. If you want to overwrite it you can pass an implementation of `StreamOne\API\v3\RequestFactoryInterface` here.
 * **cache** (optional, defaults to a `StreamOne\API\v3\NoopCache`): cache to use for both requests and tokens. Should be an implementation of `StreamOne\API\v3\CacheInterface`.
 * **request_cache** (optional, defaults to a `StreamOne\API\v3\NoopCache`): cache to use for requests. Overwrites anything set for **cache** and should also be an implementation of `StreamOne\API\v3\CacheInterface`.
@@ -122,7 +122,7 @@ The following actions can be done using a request:
 * Set an account: use `setAccount($account)` to use an account for this request. By default the **default_account** from the Config will be used, if set.
 * Set multiple accounts: use `setAccounts(array $accounts)` to set multiple accounts for this request. Some API actions allow you to provide more than one account.
 * Set a customer: use `setCustomer($customer)` to use a customer instead of an account for this request. API actions supporting multiple accounts or a customer can use this.
-* Set the timezone using `setTimeZone(DateTimeZone $timezone)`. If not set the default timezone of the current actor will be used, but one might to overwrite this.
+* Set the timezone using `setTimeZone(DateTimeZone $timezone)`. If not set the default timezone of the current actor will be used, but one might want to overwrite this.
 * Set an argument by using `setArgument($key, $value)`: most API actions allow and / or require arguments to be set. Use this function to provide them.
 
 After setting up a request you should call `execute()` to actually connect to the API and perform the request.
