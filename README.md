@@ -243,6 +243,7 @@ There are more classes available in the StreamOne SDK:
 ## Complete example
 
 ```php
+<?php
 
 use StreamOne\API\v3\Config;
 use StreamOne\API\v3\Platform;
