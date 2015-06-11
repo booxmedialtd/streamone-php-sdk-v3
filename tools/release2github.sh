@@ -5,7 +5,7 @@ SOURCE="${BASH_SOURCE[0]}"
 BASEDIR="$(dirname $(dirname $(realpath ${SOURCE})))"
 
 # Directory where files should be placed
-TARGET="$1"
+TARGET="${1}"
 
 if [[ -z "${TARGET}" || ! -d "${TARGET}" ]]; then
 	echo "Usage: $0 targetdir"
@@ -22,7 +22,7 @@ echo "About to release PHP SDK version ${VERSION}..."
 rm -Rf "${TARGET}"/*
 
 # Now copy everything from the source to the target
-cp -a "${BASEDIR}"/* "${TARGET}"
+cp -a "${BASEDIR}"/* "${TARGET}"/
 
 # Get rid of package and tools directory
 rm -Rf "${TARGET}"/package "${TARGET}"/tools
