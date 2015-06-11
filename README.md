@@ -34,7 +34,7 @@ To install, add the following to your `composer.json` file:
 ```json
 {
 	"require": {
-		"streamone/php-sdk-v3": "~3.0"
+		"streamone/php-sdk-v3": "~3.1"
 	}
 }
 ```
