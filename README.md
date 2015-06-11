@@ -27,7 +27,7 @@ The SDK requires PHP 5.4 or higher and the [PHP fopen wrappers](http://php.net/m
 
 ### Using composer
 
-The recommneded way to install the SDK is to use [Composer](http://getcomposer.org).
+The recommended way to install the SDK is to use [Composer](http://getcomposer.org).
 To install, add the following to your `composer.json` file:
 
 
