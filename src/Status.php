@@ -267,9 +267,15 @@ class Status
 
 	/**
 	 * @var int
+	 *   The requested server role was not found
+	 */
+	 const SERVER_ROLE_NOT_FOUND = 134;
+
+	/**
+	 * @var int
 	 *   This server does not have this role
 	 */
-	 const SERVER_ROLE_NOT_ASSIGNED = 133;
+	 const SERVER_ROLE_NOT_ASSIGNED = 135;
 
 	/**
 	 * @var int
@@ -429,6 +435,12 @@ class Status
 
 	/**
 	 * @var int
+	 *   The requested livestream type was not found
+	 */
+	 const LIVESTREAM_TYPE_NOT_FOUND = 243;
+
+	/**
+	 * @var int
 	 *   The requested customer was not found
 	 */
 	 const CUSTOMER_NOT_FOUND = 250;
@@ -573,6 +585,12 @@ class Status
 
 	/**
 	 * @var int
+	 *   The username already exists
+	 */
+	 const USER_USERNAME_ALREADY_EXISTS = 316;
+
+	/**
+	 * @var int
 	 *   The requested schedule was not found
 	 */
 	 const SCHEDULE_NOT_FOUND = 320;
@@ -687,6 +705,12 @@ class Status
 
 	/**
 	 * @var int
+	 *   The profile group has an height that is not supported for interlaced output
+	 */
+	 const PROFILE_INVALID_HEIGHT_FOR_INTERLACED = 379;
+
+	/**
+	 * @var int
 	 *   The requested security profile was not found
 	 */
 	 const SECURITY_PROFILE_NOT_FOUND = 380;
@@ -756,4 +780,17 @@ class Status
 	 *   The record task has an invalid status
 	 */
 	 const RECORD_TASK_INVALID_STATUS = 411;
+
+	/**
+	 * @var int
+	 *   The FTP user with the given username already exists
+	 */
+	 const FTP_USER_ALREADY_EXISTS = 420;
+
+	/**
+	 * @var int
+	 *   The FTP user could not be found
+	 */
+	 const FTP_USER_NOT_FOUND = 421;
+
 }
