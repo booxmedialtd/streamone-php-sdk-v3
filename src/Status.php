@@ -793,4 +793,46 @@ class Status
 	 */
 	 const FTP_USER_NOT_FOUND = 421;
 
+	/**
+	 * @var int
+	 *   
+	 */
+	 const SSO_SERVICE_NOT_FOUND = 430;
+
+	/**
+	 * @var int
+	 *   
+	 */
+	 const USER_ALREADY_HAS_SSO_TOKEN = 431;
+
+	/**
+	 * @var int
+	 *   
+	 */
+	 const USER_HAS_NO_SSO_TOKEN = 432;
+
+	/**
+	 * @var int
+	 *   
+	 */
+	 const SSO_RESPONSE_INVALID = 433;
+
+	/**
+	 * @var int
+	 *   
+	 */
+	 const SSO_TOKEN_UNKNOWN = 434;
+
+	/**
+	 * @var int
+	 *   The requested item has no poster archive
+	 */
+	 const ITEM_NO_POSTER_ARCHIVE = 440;
+
+	/**
+	 * @var int
+	 *   The specified poster index is not present in the poster archive
+	 */
+	 const ITEM_POSTER_INDEX_NOT_FOUND = 441;
+
 }
