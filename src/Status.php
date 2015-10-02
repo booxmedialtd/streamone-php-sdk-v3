@@ -795,31 +795,31 @@ class Status
 
 	/**
 	 * @var int
-	 *   
+	 *   The requested Single Sign-On service could not be found
 	 */
 	 const SSO_SERVICE_NOT_FOUND = 430;
 
 	/**
 	 * @var int
-	 *   
+	 *   The given user already has a token for the given Single Sign-On service
 	 */
 	 const USER_ALREADY_HAS_SSO_TOKEN = 431;
 
 	/**
 	 * @var int
-	 *   
+	 *   The given user has no token for the given Single Sign-On service
 	 */
 	 const USER_HAS_NO_SSO_TOKEN = 432;
 
 	/**
 	 * @var int
-	 *   
+	 *   The given SSO response is invalid
 	 */
 	 const SSO_RESPONSE_INVALID = 433;
 
 	/**
 	 * @var int
-	 *   
+	 *   The given SSO token is unknown
 	 */
 	 const SSO_TOKEN_UNKNOWN = 434;
 
