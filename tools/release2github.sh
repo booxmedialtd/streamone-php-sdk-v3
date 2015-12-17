@@ -10,6 +10,7 @@ TARGET="${1}"
 if [[ -z "${TARGET}" || ! -d "${TARGET}" ]]; then
 	echo "Usage: $0 targetdir"
 	echo "  Where the target directory is the directory where the github checkout resides"
+	exit
 fi
 
 # Determine version to add
@@ -24,8 +25,8 @@ rm -Rf "${TARGET}"/*
 # Now copy everything from the source to the target
 cp -a "${BASEDIR}"/* "${TARGET}"/
 
-# Get rid of package and tools directory
-rm -Rf "${TARGET}"/package "${TARGET}"/tools
+# Get rid of package and tools directory and also xunitlog output
+rm -Rf "${TARGET}"/package "${TARGET}"/tools "${TARGET}"/tests/xunitlog.xml
 
 # Commit and create tag
 cd "${TARGET}"

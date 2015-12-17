@@ -1,7 +1,9 @@
 CHANGELOG
 =========
 
-## 3.2 (Unreleased)
+## 3.3 (Unreleased)
+
+## 3.2 (2015-12-16)
 * Added ability to use array arguments
 * Updated available status codes
 
