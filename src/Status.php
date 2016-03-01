@@ -627,6 +627,12 @@ class Status
 
 	/**
 	 * @var int
+	 *   The share player is not found
+	 */
+	 const SHARE_PLAYER_NOT_FOUND = 333;
+
+	/**
+	 * @var int
 	 *   The requested origin was not found
 	 */
 	 const ORIGIN_NOT_FOUND = 340;
@@ -834,5 +840,41 @@ class Status
 	 *   The specified poster index is not present in the poster archive
 	 */
 	 const ITEM_POSTER_INDEX_NOT_FOUND = 441;
+
+	/**
+	 * @var int
+	 *   The file has already been inserted
+	 */
+	 const FILE_ALREADY_INSERTED = 450;
+
+	/**
+	 * @var int
+	 *   The requested player skin was not found
+	 */
+	 const PLAYER_SKIN_NOT_FOUND = 460;
+
+	/**
+	 * @var int
+	 *   The player skin is still used by at least one player
+	 */
+	 const PLAYER_SKIN_STILL_USED = 461;
+
+	/**
+	 * @var int
+	 *   The given metadata key could not be found or is owned by another account
+	 */
+	 const METADATA_KEY_NOT_FOUND = 470;
+
+	/**
+	 * @var int
+	 *   The metadata key already exists
+	 */
+	 const METADATA_KEY_ALREADY_EXISTS = 471;
+
+	/**
+	 * @var int
+	 *   The metadata key is still in use and cannot be deleted
+	 */
+	 const METADATA_KEY_IN_USE = 472;
 
 }
