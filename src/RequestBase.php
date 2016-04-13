@@ -530,6 +530,8 @@ abstract class RequestBase
 	 */
 	public function success()
 	{
+		// It is sufficient to only check status() since it returns null if the response is
+		// not valid.
 		return ($this->status() === 0);
 	}
 
