@@ -530,7 +530,7 @@ abstract class RequestBase
 	 */
 	public function success()
 	{
-		return ($this->valid() && ($this->response['header']['status'] === 0));
+		return ($this->status() === 0);
 	}
 
 	/**
