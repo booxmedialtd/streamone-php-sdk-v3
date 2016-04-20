@@ -301,6 +301,10 @@ abstract class RequestBase
 		{
 			$value = implode(',', $value);
 		}
+		elseif (is_bool($value))
+		{
+			$value = $value ? 1 : 0;
+		}
 		$this->arguments[$argument] = $value;
 		
 		return $this;
