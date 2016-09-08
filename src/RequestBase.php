@@ -738,8 +738,8 @@ abstract class RequestBase
 			'http' => array(
 				'method' => 'POST',
 				'content' => http_build_query($arguments),
-				'header' => "Content-Type: application/x-www-form-urlencoded"
-			)
+				'header' => "Content-Type: application/x-www-form-urlencoded\nConnection: close",
+			),
 		);
 		$stream_parameters = array_merge($stream_parameters, $this->extraStreamParameters());
 		$context = stream_context_create($stream_parameters);
